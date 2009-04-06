@@ -1,70 +1,79 @@
 #ifndef mdf_h
 #define mdf_h
  
+#include <stdlib.h>
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <values.h>
 #include "nnAlg.h"
+#include "checkInNNAlg.h"
+#include "lib_string.h"
 
-class Mdf: public NNAlg {
-public:
 
-  Mdf( Oracle *_o, const char data[]);
 
-  void insert(Point p);
+class Mdf: public NNAlg 
+{
+  public:
 
-  void insertBulk( Point p[], int c);
+	Mdf( vector<string> data, Oracle *_o );
 
-  void NN(Point p);
- 
-  Point nnPoint();
+	~Mdf();
+	
+	void Insert(Point p);
 
-  double nnDistance();
+	void InsertBulk( Point p[], int c);
 
-  ~Mdf();
+	void SearchNN(Point p);
+
+	
 
 // protected:
 
-  class Tree {
-  public:
-    Tree(): lChild(0), rChild(0) {};
+	class Tree 
+	{
+		public:
+			Tree(): lChild(0), rChild(0) {};
 
-    ~Tree() {
-      if( lChild != 0)
-        delete lChild;
-      if( rChild != 0)
-        delete rChild;
-    }
+			~Tree() {
+			  if( lChild != 0)
+				delete lChild;
+			  if( rChild != 0)
+				delete rChild;
+			}
 
-    Tree *lChild;
-    Tree *rChild;
-    Point rep;
-    double radius; // radius 
-    double minRadius; // distacia al mas cercano del hermano
+			Tree *lChild;
+			Tree *rChild;
+			Point rep;
+			double radius; // radius 
+			double minRadius; // distacia al mas cercano del hermano
+	};
 
-  };
+	void ExtractPoints( Mdf::Tree *t, vector<Point> &db);
 
-  void extractPoints( Mdf::Tree *t, vector<Point> &db);
+	void Insert( Point p, Mdf::Tree* &t, double disToRep);
 
-  void insert( Point p, Mdf::Tree* &t, double disToRep);
+	Mdf::Tree* BuildTree( Point lRep,
+		                vector<Point> db,
+		                vector<double> dLRep,
+		                double minRadius );
 
-  Mdf::Tree* buildTree( Point lRep,
-                        vector<Point> db,
-                        vector<double> dLRep,
-                        double minRadius );
+	void SearchNN( const Mdf::Tree  *t,
+		         double disToLeftRep);
 
-  void NN( const Mdf::Tree  *t,
-                 double disToLeftRep);
-
-  void print( Mdf::Tree *t);
+	void Print( Mdf::Tree *t);
+  
+  
 private:
 
-  Point qp;     // The query point
-  Point nnp;    // The Nearest Neighbour Point
-  double nnd;   // The Nearest Neighbour Distance
-  Oracle* o;
-  Tree *root;
-  bool fRule;
-  bool sRule;
-  bool uRule;
+	Point qp;     // The query point
+	Tree *root;
+	bool fRule;
+	bool sRule;
+	bool uRule;
 
 };
 
 #endif
+

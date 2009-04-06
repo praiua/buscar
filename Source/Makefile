@@ -1,45 +1,56 @@
-# CPP = g++-4.1
+
 CPP = g++
 # OPTS = -Wall -g
 OPTS = -Wall -O3
 
-all: buscar.so
 
-FONTS = uniformOracle.cc bruteForce.cc mdf.cc checkInNNAlg.cc checkInOracle.cc 
-OBJ = uniformOracle.o bruteForce.o mdf.o checkInNNAlg.o checkInOracle.o 
+all: buscar #exp exp2
 
-FILTER = 2>&1 | head -10
+OBJ = uniformOracle.o bruteForce.o mdf.o checkInNNAlg.o checkInOracle.o lib_string.o
 
-buscar.so: ${OBJ} 
-	${CPP} ${OPTS} ${OBJ} -shared -o buscar.so ${FILTER}
-	# "-------------------"
 
+
+buscar: buscar.cc ${OBJ}
+	${CPP} ${OPTS} buscar.cc ${OBJ} -o buscar
+
+
+lib_string.o: lib_string.cc lib_string.h
+	${CPP} ${OPTS} -c lib_string.cc
+
+checkInNNAlg.o: checkInNNAlg.cc checkInNNAlg.h nnAlg.h
+	${CPP} ${OPTS} -c checkInNNAlg.cc
+
+checkInOracle.o: checkInOracle.cc checkInOracle.h oracle.h
+	${CPP} ${OPTS} -c checkInOracle.cc
+
+#exp: exp.cc ${OBJ} nnAlg.h checkInNNAlg.h checkInOracle.h
+#	${CPP} ${OPTS} exp.cc ${OBJ} -o exp 
+# "-------------------"
+
+#exp2: exp2.cc ${OBJ} nnAlg.h checkInNNAlg.h checkInOracle.h
+#	${CPP} ${OPTS} exp2.cc ${OBJ} -o exp2
+# "-------------------"
+
+clean:
+	rm -f *.o buscar
+
+
+####################################
 # --- ORACLES ---
 
 uniformOracle.o : uniformOracle.cc uniformOracle.h oracle.h checkInOracle.h
-	${CPP} ${OPTS} -c uniformOracle.cc ${FILTER}
+	${CPP} ${OPTS} -c uniformOracle.cc
 
-# ---- NN Algorithms ---
+
+#####################################
+# --- NN Algorithms ---
 
 bruteForce.o: bruteForce.cc bruteForce.h nnAlg.h checkInNNAlg.h
-	${CPP} ${OPTS} -c bruteForce.cc ${FILTER}
+	${CPP} ${OPTS} -c bruteForce.cc
 
 mdf.o: mdf.cc mdf.h nnAlg.h checkInNNAlg.h
-	${CPP} ${OPTS} -c mdf.cc ${FILTER}
+	${CPP} ${OPTS} -c mdf.cc
 
-# --- Other ---
 
-checkInNNAlg.o: checkInNNAlg.cc checkInNNAlg.h nnAlg.h
-	${CPP} ${OPTS} -c checkInNNAlg.cc ${FILTER}
 
-checkInOracle.o: checkInOracle.cc checkInOracle.h oracle.h
-	${CPP} ${OPTS} -c checkInOracle.cc ${FILTER}
 
-# --- Utilities ---
-
-install: buscar.so
-	cp buscar.so ../lib
-	cp *.h ../include
-	
-clean:
-	rm -f *.o buscar

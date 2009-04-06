@@ -1,11 +1,5 @@
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <values.h>
+
 #include "mdf.h"
-#include "checkInNNAlg.h"
 
 
 CheckInNNAlg(
@@ -15,79 +9,72 @@ CheckInNNAlg(
   -r [fsu]      Pruning rules: Fukunaga, Sibling, Ullman"
 )
 
-Mdf::~Mdf() {
-  delete root;
+
+//-------------------------------------------------------------------
+//
+Mdf::~Mdf() 
+{
+	delete root;
 }
 
 //-------------------------------------------------------------------
 //    Options set up
 //-------------------------------------------------------------------
 
-Mdf::Mdf( Oracle *_o, const char data[] ) {
-  o = _o;
-  istringstream opts(data);
+Mdf::Mdf( vector<string> data, Oracle *oracle ) 
+{
+	mOracle = oracle;
+	root = 0;
+	fRule = false;
+	sRule = false;
+	uRule = false;
 
-  string token;
-  fRule = false;
-  sRule = false;
-  uRule = false;
-
-  while( opts >> token ) {
-    if( token == "-r" ) {
-      if( !(opts >> token) ) {
-	cerr << "ERROR in the options of the NN Algorithm 'Mdf'" << endl;
-	cerr << "  -r argument not valid." << endl;
-	exit(-1);
-      }
-      int len = token.length();
-      for( int i = 0; i < len; i++ ) {
-        if( token[i] == 'f' )
-	  fRule = true;
-	else if( token[i] == 's' )
-	  sRule = true;
-	else if( token[i] == 'u' )
-	  uRule = true;
-	else {
-	  cerr << "ERROR in the options of the NN Algorithm 'Mdf'" << endl;
-	  cerr << "  unknown '" << token[i] << "' rule." << endl;
-	  exit(-1);
+	if( data.size() != 3 || data[1] != "-r" )
+	{
+		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
+		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
+		exit(-1);
 	}
-      }
-    } else {
-      cerr << "ERROR in the options of the NN Algorithm 'Mdf'" << endl;
-      cerr << "  unknown '" << token << "' option." << endl;
-      exit(-1);
-    }
-  }
-  root = 0;
 
+	if( data[2] == "f" )
+		fRule = true;
+	else if(  data[2] == "s" )
+		sRule = true;
+	else if(  data[2] == "u" )
+		uRule = true;
+	else {
+		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
+		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
+		exit(-1);
+	}
 }
+
 
 //-------------------------------------------------------------------
 // Insert Bulk
 //-------------------------------------------------------------------
+void Mdf::InsertBulk( Point _db[], int c) 
+{
+	if( root != 0 )
+		delete root;
 
-void Mdf::insertBulk( Point _db[], int c) {
+	vector<Point> db( _db+1, _db + c );
+	vector<double> dLRep(db.size());
 
-  if( root != 0 )
-    delete root;
+	int lRep = _db[0];
 
-  vector<Point> db( _db+1, _db + c );
-  vector<double> dLRep(db.size());
+	for( unsigned int i = 0; i < db.size(); i++ ) {
+		dLRep[i] = mOracle->GetDistance(lRep, db[i]);
+	}
 
-  int lRep = _db[0];
-  for( unsigned int i = 0; i < db.size(); i++ ) {
-    dLRep[i] = o->distance(lRep, db[i]);
-  }
+	root = BuildTree( lRep, db, dLRep, 0.0 );
 
-  root = buildTree( lRep, db, dLRep, 0.0 );
-
-  // print( root );
+	// print( root );
 }
 
 //-------------------------------------
 
-Mdf::Tree *Mdf::buildTree(  Point lRep, 
+Mdf::Tree *Mdf::BuildTree(  Point lRep, 
                             vector<Point> db,
 		            vector<double> dLRep,
                             double minRadius
@@ -137,7 +124,7 @@ Mdf::Tree *Mdf::buildTree(  Point lRep,
 
   vector<double> dRRep(db.size());
   for( unsigned int i = 0; i < db.size(); i++ ) {
-    dRRep[i] = o->distance(rRep,db[i]);
+    dRRep[i] = mOracle->GetDistance(rRep,db[i]);
   } 
 
   // distribute the points by its NN
@@ -150,7 +137,8 @@ Mdf::Tree *Mdf::buildTree(  Point lRep,
   double minRadiusL = radius;
   double minRadiusR = radius;
 
-  for( unsigned int i = 0; i < db.size(); i++ ) {
+  for( unsigned int i = 0; i < db.size(); i++ ) 
+  {
     if( dLRep[i] < dRRep[i] ) {
       lP.push_back(db[i]);
       dLP.push_back(dLRep[i]);
@@ -166,8 +154,8 @@ Mdf::Tree *Mdf::buildTree(  Point lRep,
 
   // recursive call
 
-  Tree *lTree = buildTree( lRep, lP, dLP, minRadiusL );
-  Tree *rTree = buildTree( rRep, rP, dRP, minRadiusR );
+  Tree *lTree = BuildTree( lRep, lP, dLP, minRadiusL );
+  Tree *rTree = BuildTree( rRep, rP, dRP, minRadiusR );
       
   Tree *t = new Tree;
   if( t == 0 ) {
@@ -188,40 +176,45 @@ Mdf::Tree *Mdf::buildTree(  Point lRep,
 // Insert Incrementally
 //-------------------------------------------------------------------
 
-void Mdf::insert( Point p) {
+void Mdf::Insert( Point p) {
 
   if( root == 0 ) { // only used when inserting the first point
     vector<Point> db;
     vector<double> dP;
-    root = buildTree( p, db, dP, 0.0 ); 
+    root = BuildTree( p, db, dP, 0.0 ); 
     return;
   }
 
-  double disToLRep = o->distance(root->rep, p);
-  insert(p, root, disToLRep);
+  double disToLRep = mOracle->GetDistance(root->rep, p);
+  
+  Insert(p, root, disToLRep);
+  
   // cout << "-- Printing tree --" << endl;
   // print( root );
 }
 
+
 //----------------------
 //
-void Mdf::insert( Point p, Mdf::Tree* &t, double disToLRep ) {
-  
+void Mdf::Insert( Point p, Mdf::Tree* &t, double disToLRep ) 
+{  
   Point lRep = t->rep;
   if( disToLRep > t->radius ) {
     vector<Point> db;
     vector<double> dLRep;
 
-    extractPoints( t, db );
+    ExtractPoints( t, db );
+    
     for( unsigned int i = 0; i < db.size(); i++ ) {
-      dLRep.push_back( o->distance( lRep, db[i]));
+      dLRep.push_back( mOracle->GetDistance( lRep, db[i]));
     }
+    
     db.push_back(p);
     dLRep.push_back(disToLRep);
     double minRad = t->minRadius;
     delete t;
 
-    t = buildTree( lRep, db, dLRep, minRad ); // CAMBIALO
+    t = BuildTree( lRep, db, dLRep, minRad ); // CAMBIALO
     return;
   } 
 
@@ -238,39 +231,46 @@ void Mdf::insert( Point p, Mdf::Tree* &t, double disToLRep ) {
     dP.push_back(disToLRep);
     double minRad = disToLRep;
     delete t;
-    t = buildTree(lRep, db, dP, minRad); 
+    
+    t = BuildTree(lRep, db, dP, minRad); 
+    
     return;
   }
 
-  double disToRRep = o->distance( p, t->rChild->rep );
-  if( disToLRep < disToRRep ) {
-    insert( p, t->lChild, disToLRep );
+  double disToRRep = mOracle->GetDistance( p, t->rChild->rep );
+  
+  if( disToLRep < disToRRep ) 
+  {
+    Insert( p, t->lChild, disToLRep );
     if( disToRRep < t->rChild->minRadius )
       t->rChild->minRadius = disToRRep;
   } else {
-    insert( p, t->rChild, disToRRep );
+    Insert( p, t->rChild, disToRRep );
     if( disToLRep < t->lChild->minRadius )
       t->lChild->minRadius = disToLRep;
   }
 }
 
+
 //-------------------
 //
-void Mdf::extractPoints( Mdf::Tree* t, vector<Point> &db) {
+void Mdf::ExtractPoints( Mdf::Tree* t, vector<Point> &db) 
+{
   if( t->lChild != 0 ) {
-    extractPoints(t->lChild, db);
+    ExtractPoints(t->lChild, db);
   }
   if( t->rChild != 0 ) {
     db.push_back(t->rChild->rep);
-    extractPoints(t->rChild, db);
+    ExtractPoints(t->rChild, db);
   }
 }
+
 
 //-------------------------------------------------------------------
 //    Search
 //-------------------------------------------------------------------
 
-void Mdf::NN( const Mdf::Tree  *t,
+void Mdf::SearchNN( const Mdf::Tree  *t,
 	      double disToLeftRep ) {
 
   if( t->lChild == 0 && t->rChild == 0 ) {  // if I'm in a leave
@@ -284,12 +284,12 @@ void Mdf::NN( const Mdf::Tree  *t,
       // rule f not activated or left node cannot be pruned
     if( !fRule || disToLeftRep - nnd < t->lChild->radius ){
         // looking only on the left --> sibling node has been pruned 
-        NN( t->lChild, disToLeftRep);
+        SearchNN( t->lChild, disToLeftRep);
     }
     return; // both were pruned.
   }    
 
-  double disToRightRep = o->distance( qp, t->rChild->rep);
+  double disToRightRep = mOracle->GetDistance( qp, t->rChild->rep);
   if( disToRightRep < nnd ){
     nnd = disToRightRep;
     nnp = t->rChild->rep;
@@ -301,14 +301,14 @@ void Mdf::NN( const Mdf::Tree  *t,
         && (!sRule || disToRightRep + nnd > t->rChild->minRadius )
         && (!uRule || disToLeftRep - nnd < disToRightRep + nnd )
       ) {
-        NN( t->lChild, disToLeftRep);
+        SearchNN( t->lChild, disToLeftRep);
     }
     // pruning and seaching if needed RIGHT
     if(    (!fRule || disToRightRep - nnd < t->rChild->radius ) 
         && (!sRule || disToLeftRep + nnd > t->lChild->minRadius ) 
         && (!uRule || disToLeftRep + nnd > disToRightRep - nnd )
       ) {
-      NN( t->rChild, disToRightRep );
+      SearchNN( t->rChild, disToRightRep );
     }
   } else {
     // pruning and seaching if needed RIGHT
@@ -316,50 +316,42 @@ void Mdf::NN( const Mdf::Tree  *t,
         && (!sRule || disToLeftRep + nnd > t->lChild->minRadius ) 
         && (!uRule || disToLeftRep + nnd > disToRightRep - nnd )
       ) {
-      NN( t->rChild, disToRightRep );
+      SearchNN( t->rChild, disToRightRep );
     }
     // pruning and seaching if needed LEFT
     if(    (!fRule || disToLeftRep - nnd < t->lChild->radius )
         && (!sRule || disToRightRep + nnd > t->rChild->minRadius ) 
         && (!uRule || disToLeftRep - nnd < disToRightRep + nnd )
       ) {
-      NN( t->lChild, disToLeftRep );
+      SearchNN( t->lChild, disToLeftRep );
     }
   }
 }
 
-void Mdf::NN( Point _qp) {
-
+//--------------------------------------
+void Mdf::SearchNN( Point _qp) 
+{
   qp = _qp;
   nnp = root->rep;
-  nnd = o->distance( qp, root->rep );
+  nnd = mOracle->GetDistance( qp, root->rep );
 
-  return NN( root, nnd );
+  return SearchNN( root, nnd );
 }
 
-//-------------------------------------------------------------------
-//  Output
-//-------------------------------------------------------------------
 
-Point Mdf::nnPoint() {
-  return nnp;
-}
-
-double Mdf::nnDistance() {
-  return nnd;
-}
 
 //-------------------------------------------------------------------
 //  Auxiliary
 //-------------------------------------------------------------------
 
-void Mdf::print( Mdf::Tree *t) {
+void Mdf::Print( Mdf::Tree *t) 
+{
   if( t != 0 ) {
     cout << "rep:" << t->rep << endl;
     cout << "radius: " << t->radius << endl;
     cout << "minRadius: " << t->minRadius << endl;
     cout << endl;
-    print( t->lChild );
-    print( t->rChild );
+    Print( t->lChild );
+    Print( t->rChild );
   }
 }

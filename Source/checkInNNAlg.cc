@@ -1,5 +1,5 @@
 #include <map>
 #include "checkInNNAlg.h"
 
-map<string, NNAlg* (*)(Oracle*, const char d[])> CheckInNNAlg::table;
+map<string, NNAlg* (*)( vector<string>, Oracle* )> CheckInNNAlg::table;
 map<string, string> CheckInNNAlg::tableInfo;

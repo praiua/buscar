@@ -21,6 +21,8 @@ UniformOracle::UniformOracle( vector<string> data )
 		exit(-1);
 	}
 	
+	cout << "** mDim: " << mDim << endl;
+
 	if( mDim < 0 ) {
 		cerr << "ERROR (" << data[0] << "): A dimension should be specified" << endl;
 		exit(-1);

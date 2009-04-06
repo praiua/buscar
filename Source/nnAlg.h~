@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include "oracle.h"
+#include "checkInNNAlg.h"
 
 
 class NNAlg 

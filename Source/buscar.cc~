@@ -4,9 +4,10 @@
 #include <vector>
 #include <stdlib.h>
 #include <assert.h>
-//#include "oracle.h"
-//#include "nnAlg.h"
-//#include "checkInNNAlg.h"
+#include "lib_string.h"
+#include "oracle.h"
+#include "nnAlg.h"
+#include "checkInNNAlg.h"
 #include "checkInOracle.h"
 
 using namespace std;
@@ -30,9 +31,6 @@ struct Operation {
   
 
 
-
-
-
 //-------------------------------------------------------------
 //
 void PrintUsage(string mainFileName)
@@ -52,25 +50,30 @@ void PrintUsage(string mainFileName)
 	cout << "  -h                      Help" << endl;
 	cout << "  -alg <name> \"<options>\" NN algorithm" << endl; 
 	cout << "  -ora <name> \"<options>\" Data generator" << endl;
-	cout << endl;
 
-	cout << "--- NN Algorithm options ---" << endl;
-//	CheckInNNAlg::listInfo();
+	cout << "\n--- NN Algorithm options ---" << endl;
+	CheckInNNAlg::ListInfo();
 
 	cout << "--- Oracle options ---" << endl;
-//	CheckInOracle::listInfo();
+	CheckInOracle::ListInfo();
 }
+
 
 
 //-------------------------------------------------------------
 //
-bool checkInputParameters( int argc, char* argv[], 
+void checkInputParameters( int argc, char* argv[], 
 				int &seed, bool &check, bool &debug,
-				string &nnAlg, string &nnAlgOpts, 
-				string &oracle, string &oracleOpts, 
+				vector<string> &nnAlgOpts,
+				vector<string> &oracleOpts,
 				vector<Operation> &operationList)
 {
 	bool selectedOneMode = false;
+	
+	if(argc == 1) {
+		PrintUsage( argv[0] );
+		exit(0);
+	}	
 	
 	for( int i = 1; i < argc; i++ ) 
 	{
@@ -127,7 +130,7 @@ bool checkInputParameters( int argc, char* argv[],
 			if(i < argc-1 && argv[i+1][0] != '-')
 				operationList[operationList.size()-1].repetitions = atoi(argv[++i]);
 			else {
-				cout << "ERROR: Option '" << argv[i] << "' requires: <repetitions>" << endl;
+				cout << "ERROR: Option '" << argv[i] << "' requires: <repetitions>\n";
 				exit(-1);
 			}
 		} 
@@ -150,25 +153,29 @@ bool checkInputParameters( int argc, char* argv[],
 		} 
 		else if( string( argv[i] ) == "-alg" ) 
 		{
-			if(i < argc-2 && argv[i+1][0] != '-' && argv[i+2][0] != '-')
+			if(i < argc-2 && argv[i+1][0] != '-')
 			{
-				nnAlg = argv[++i];
-				nnAlgOpts = argv[++i];
+				nnAlgOpts.push_back( argv[++i] );
+				vector<string> aux = StringToVector( argv[++i] );
+				nnAlgOpts.insert( nnAlgOpts.end(), aux.begin(), aux.end() );
 			}
 			else {
-				cout << "ERROR: Option '" << argv[i] << "' requires: <NN algorithm> \"<options>\"" << endl;
+				cout << "ERROR: Option '" << argv[i];
+				cout << "' requires: <NN algorithm> \"<options>\"" << endl;
 				exit(-1);
 			}
 		} 
 		else if( string( argv[i] ) == "-ora" ) 
 		{
-			if(i < argc-2 && argv[i+1][0] != '-' && argv[i+2][0] != '-')
+			if(i < argc-2 && argv[i+1][0] != '-')
 			{
-				oracle = argv[++i];
-				oracleOpts = argv[++i];
+				oracleOpts.push_back( argv[++i] );
+				vector<string> aux = StringToVector( argv[++i] );
+				oracleOpts.insert( oracleOpts.end(), aux.begin(), aux.end() );
 			}
 			else {
-				cout << "ERROR: Option '" << argv[i] << "' requires: <Data generator> \"<options>\"" << endl;
+				cout << "ERROR: Option '" << argv[i];
+				cout << "' requires: <Data generator> \"<options>\"" << endl;
 				exit(-1);
 			}
 		} 
@@ -197,13 +204,13 @@ bool checkInputParameters( int argc, char* argv[],
 	}
 	*/
 
-	if( oracle.empty() ) {
+	if( oracleOpts.empty() ) {
 		cout << "ERROR: you have to specify an oracle (\"-ora\" option) " << endl;
 		exit(-1);
 	}
 
-	if( nnAlg.empty() ) {
-		cout << "ERROR: you have to specify a NN algorithm (\"-alg\" option) " << endl;
+	if( nnAlgOpts.empty() ) {
+		cout << "ERROR: you have to specify a NN algorithm (\"-alg\" option)" << endl;
 		exit(-1);
 	}
 
@@ -213,117 +220,135 @@ bool checkInputParameters( int argc, char* argv[],
 //-------------------------------------------------------------
 //
 void PrintOperation(bool heading, string operation, int size, int seed, float dist, 
-					string alg, string algOpts, string ora, string oraOpts)
+					vector<string> algOpts, vector<string> oraOpts)
 {
 	if( heading ) {
-		printf("%6s %6s %4s %7s %5s %10s %6s %10s\n",
+		printf("%6s %6s %4s %7s   %-15s   %-16s\n",
 				"# Oper", "size", "Seed", "Dist", 
-				"Alg", "Alg_Opts", "Ora", "Ora_Opts");
+				"NN Algorithm", "Oracle");
 	}
 
 	printf("%6s %6d %4d ", operation.c_str(), size, seed);
 	
 	if(operation == "-t")
-		printf("%7.2f ", dist);
+		printf("%7.2f", dist);
 	else
-		printf("%7d ", (int)dist);
+		printf("%7d", (int)dist);
 	
-	printf("%5s %-10s %6s %-10s\n",			
-			alg.c_str(), algOpts.c_str(), ora.c_str(), oraOpts.c_str() );
+	printf("   %-15s   %-16s\n",			
+		VectorToString( algOpts ).c_str(), VectorToString ( oraOpts ).c_str() );
 }
 
 
 
 //-------------------------------------------------------------
-// Inserting BULK
-void OperationInsertingBulk(Operation operation, int seed, 
-		string nnAlg, string nnAlgOpts, string oracle, string oracleOpts)
+// Inserting BULK (Option -b)
+void OperationInsertingBulk(Operation operation, int seed, bool check, 
+		NNAlg* nnAlg, NNAlg* nnAlgBF, Oracle* oracle,
+		vector<string> nnAlgOpts, vector<string> oracleOpts)
 {
 	int accDis = 0;
 	int bulk = operation.size;	
-/*	Point v[bulk];
+	Point v[bulk];
 	
 	for( int i = 0; i < bulk; i++ ) 
 	{
-		v[i] = o->newPoint();
+		v[i] = oracle->NewPoint();
 	}
-	int dis = o->distanceComputations();
-	s->insertBulk(v,bulk);  // this can only be done once 
-	dis = o->distanceComputations() - dis;
+	
+	int dis = oracle->NumOfDistanceComputations();
+	
+	nnAlg->InsertBulk(v, bulk);  // It can only be done once 
+	
+	dis = oracle->NumOfDistanceComputations() - dis;
+	
 	accDis += dis;
 
 	if( check ) {
-		bf->insertBulk(v,bulk);
+		nnAlgBF->InsertBulk(v,bulk);
 	}
-	*/
+		
 	
 	if( operation.print )
-		PrintOperation(operation.heading, "-b", bulk, seed, accDis,  
-					nnAlg, nnAlgOpts, oracle, oracleOpts);
+		PrintOperation(operation.heading, "-b", bulk, 
+				seed, accDis, nnAlgOpts, oracleOpts);
 }
 
 
 //-------------------------------------------------------------
-// Inserting One by One
-void OperationInsertingOneByOne(Operation operation, int seed, 
-		string nnAlg, string nnAlgOpts, string oracle, string oracleOpts)
+// Inserting One by One (Option -i)
+void OperationInsertingOneByOne(Operation operation, int seed, bool check, 
+		NNAlg* nnAlg, NNAlg* nnAlgBF, Oracle* oracle,
+		vector<string> nnAlgOpts, vector<string> oracleOpts)
 {
 	int accDis = 0;
 	int inc = operation.size;
 	
-	/*for( int i = 0; i < inc; i++ ) {
-		Point p = o->newPoint();
+	for( int i = 0; i < inc; i++ ) 
+	{
+		Point p = oracle->NewPoint();
 		//    cout << "--- i: " << i << endl;
-		int dis = o->distanceComputations();
-		s->insert(p);
-		dis = o->distanceComputations() - dis;
+		int dis = oracle->NumOfDistanceComputations();
+		
+		nnAlg->Insert(p);
+		
+		dis = oracle->NumOfDistanceComputations() - dis;
 		accDis += dis;
+		
 		if( check ) {
-			bf->insert(p);
+			nnAlgBF->Insert(p);
 		}
 	}
-	*/
 	
+		
 	if( operation.print )
-		PrintOperation(operation.heading, "-i", inc, seed, accDis, 
-				nnAlg, nnAlgOpts, oracle, oracleOpts);
-
+		PrintOperation(operation.heading, "-i", inc, 
+				seed, accDis, nnAlgOpts, oracleOpts);
 }
 
 
 
 //-------------------------------------------------------------
-// Testing
-void OperationTesting(Operation operation, int seed, 
-		string nnAlg, string nnAlgOpts, string oracle, string oracleOpts)
+// Testing  (Option -t)
+void OperationTesting(Operation operation, int seed, bool check, 
+		NNAlg* nnAlg, NNAlg* nnAlgBF, Oracle* oracle,
+		vector<string> nnAlgOpts, vector<string> oracleOpts)
 {
 	int accDis = 0;
 	int testSize = operation.size;
 	
-	/*for( int i = 0; i < testSize; i++ ) 
+	for( int i = 0; i < testSize; i++ ) 
 	{
-		Point p = o->newPoint();
-		int dis = o->distanceComputations();
-		s->NN(p);
-		dis = o->distanceComputations() - dis;
+		Point p = oracle->NewPoint();
+		int dis = oracle->NumOfDistanceComputations();
+		
+		nnAlg->SearchNN(p);
+		
+		dis = oracle->NumOfDistanceComputations() - dis;
 		accDis += dis;
-		if(check) {
-			bf->NN(p);
-			if( s->nnDistance() != bf->nnDistance() ) {
-				cout << "ERROR: the result does not agrees with the brute force" << endl;
+		
+		if(check) 
+		{
+			nnAlgBF->SearchNN(p);
+			
+			if( nnAlg->GetNNDistance() != nnAlgBF->GetNNDistance() ) {
+				cout << "ERROR: the result does not agrees with the brute force\n";
 				cout << "iteration: " << i << endl;
-				cout << "bf point: " << bf->nnPoint() << " dis: " << bf->nnDistance() << endl;
-				cout << "alg point: " << s->nnPoint() << " dis: " << s->nnDistance() << endl;
+				cout << "bf point: " << nnAlgBF->GetNNPoint();
+				cout << " dis: " << nnAlgBF->GetNNDistance() << endl;
+				cout << "alg point: " << nnAlg->GetNNPoint();
+				cout << " dis: " << nnAlg->GetNNDistance() << endl;
 				exit(-1);
 			}
 		}
-	} 
-	*/
+	}
+	
 	
 	if( operation.print )
-		PrintOperation(operation.heading, "-t", testSize, seed, accDis/double(testSize), 
-				nnAlg, nnAlgOpts, oracle, oracleOpts);
+		PrintOperation(operation.heading, "-t", testSize, 
+				seed, accDis/double(testSize), nnAlgOpts, oracleOpts);
 }
+
 
 
 
@@ -334,14 +359,13 @@ int main( int argc, char* argv[] )
 	int seed = 1;
 	bool check = false;
 	bool debug = false;
-	string nnAlg, nnAlgOpts;
-	string oracle, oracleOpts;
+	vector<string> nnAlgOpts, oracleOpts;
 	vector<Operation> operationList;
 
 
 	checkInputParameters( argc, argv, 
 						  seed, check, debug, 
-						  nnAlg, nnAlgOpts, oracle, oracleOpts,
+						  nnAlgOpts, oracleOpts,
 						  operationList);
 
 
@@ -349,30 +373,33 @@ int main( int argc, char* argv[] )
 	{
 		cout << "# Seed : " << seed << endl;
 		cout << "# check: " << (check ? "true" : "false") << endl;
-		cout << "# Alg  : " << nnAlg << " \"" << nnAlgOpts << "\"" << endl;
-		cout << "# Ora  : " << oracle << " \"" << oracleOpts << "\"" << endl;
+		cout << "# Alg  : " << VectorToString( nnAlgOpts ) << endl;
+		cout << "# Ora  : " << VectorToString( oracleOpts ) << endl;
 	}
 
 	srand(seed);
 
-/*
-  	Oracle* o = CheckInOracle::object( oracle, oracleOpts);
-	if( o == 0 ) {
-    	cout << "ERROR: unknown oracle '" << oracle << "'" << endl;
+
+  	Oracle* oracle = CheckInOracle::Object( oracleOpts );
+	if( oracle == 0 ) {
+    	cout << "ERROR: Unknown oracle '" << oracleOpts[0] << "'" << endl;
     	exit(-1);
  	}
 
-  	NNAlg* s = CheckInNNAlg::object(nnAlg, o, nnAlgOpts );
-  	if( s == 0 ) {
-    	cout << "ERROR: unknown NN algorithm '" << nnAlg << "'" << endl;
+  	NNAlg* nnAlg = CheckInNNAlg::Object( nnAlgOpts, oracle );
+  	if( nnAlg == 0 ) {
+    	cout << "ERROR: Unknown NN algorithm '" << nnAlgOpts[0] << "'" << endl;
     	exit(-1);
   	}
 
-  	NNAlg* bf = 0;
+  	NNAlg* nnAlgBF = 0;
   	if( check ) {
-    	bf = CheckInNNAlg::object("bf", o, "");
+  		vector<string> nnAlgBFOpts;
+  		nnAlgBFOpts.push_back("bf");
+    	nnAlgBF = CheckInNNAlg::Object( nnAlgBFOpts, oracle );
   	}
-*/
+
+
 
 	// MAIN LOOP
 	for( unsigned int opn = 0; opn < operationList.size(); opn++ ) 
@@ -382,22 +409,25 @@ int main( int argc, char* argv[] )
 			if( operationList[opn].name == "-b" ) 
 			{
 				// Inserting BULK
-				OperationInsertingBulk(operationList[opn], seed, 
-							nnAlg, nnAlgOpts, oracle, oracleOpts);
+				OperationInsertingBulk(operationList[opn], seed, check,
+							nnAlg, nnAlgBF, oracle, 
+							nnAlgOpts, oracleOpts);
 			} 
 			
 			else if( operationList[opn].name == "-i" ) 
 			{
 				// Inserting One by One
-				OperationInsertingOneByOne(operationList[opn], seed, 
-							nnAlg, nnAlgOpts, oracle, oracleOpts);
+				OperationInsertingOneByOne(operationList[opn], seed, check,
+							nnAlg, nnAlgBF, oracle,
+							nnAlgOpts, oracleOpts);
 			} 
 			
 			else if( operationList[opn].name == "-t" ) 
 			{
 				// Testing
-				OperationTesting(operationList[opn], seed, 
-							nnAlg, nnAlgOpts, oracle, oracleOpts);
+				OperationTesting(operationList[opn], seed, check,
+							nnAlg, nnAlgBF, oracle,
+							nnAlgOpts, oracleOpts);
 			} 
 			else 
 			{
@@ -406,6 +436,11 @@ int main( int argc, char* argv[] )
 			}
 		}
 	}
+	
+	
+	delete nnAlg;
+	delete nnAlgBF;
+	delete oracle;
 
 	return 0;
 }

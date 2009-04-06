@@ -17,7 +17,7 @@ using namespace std;
 
 
 template <typename T>
-Oracle* createOracle( vector<string> data ) 
+Oracle* createOracle(const char data[]) 
 {
   return new T(data);
 };
@@ -28,7 +28,7 @@ class CheckInOracle
 {
 	public:
 
-		static Oracle* Object( vector<string> data )
+		static Oracle* Object( vector<string> data)
 		{
 			if( table.count( data[0] ) == 1 )
 				return table[ data[0] ]( data );

@@ -5,6 +5,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 #include "oracle.h"
 #include "checkInOracle.h"
 #include "lib_string.h"

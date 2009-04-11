@@ -6,16 +6,9 @@ CheckInNNAlg(
   Mdf,
   "mdf",
   "Most Distant of the Father Algorithm\n\
-  -r [fsu]      Pruning rules: Fukunaga, Sibling, Ullman"
+  -r <f|s|u>      Pruning rules: f:Fukunaga, s:Sibling, u:Ullman"
 )
 
-
-//-------------------------------------------------------------------
-//
-Mdf::~Mdf() 
-{
-	delete root;
-}
 
 //-------------------------------------------------------------------
 //    Options set up
@@ -28,43 +21,60 @@ Mdf::Mdf( vector<string> data, Oracle *oracle )
 	fRule = false;
 	sRule = false;
 	uRule = false;
+	bool error = false;
 
 	if( data.size() != 3 || data[1] != "-r" )
 	{
-		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-		exit(-1);
+		error = true;
 	}
-
-	if( data[2] == "f" )
+	else if( data[2] == "f" )
 		fRule = true;
 	else if(  data[2] == "s" )
 		sRule = true;
 	else if(  data[2] == "u" )
 		uRule = true;
 	else {
+		error = true;
+	}
+	
+	if( error )
+	{
 		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
 		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
+		cout << "Usage: " << endl;
+		CheckInNNAlg::ListInfo( data[0] );
 		exit(-1);
 	}
 }
 
 
+//---------------------------------------
+//
+Mdf::~Mdf() 
+{
+	delete root;
+}
+
+
+
 //-------------------------------------------------------------------
 // Insert Bulk
 //-------------------------------------------------------------------
-void Mdf::InsertBulk( Point _db[], int c) 
+void Mdf::InsertBulk( Point _db[], int size ) 
 {
+	assert( size >= 0 );
+	
 	if( root != 0 )
 		delete root;
 
-	vector<Point> db( _db+1, _db + c );
-	vector<double> dLRep(db.size());
+	vector<Point> db( _db+1, _db + size );
+	vector<double> dLRep( db.size() );
 
 	int lRep = _db[0];
 
-	for( unsigned int i = 0; i < db.size(); i++ ) {
-		dLRep[i] = mOracle->GetDistance(lRep, db[i]);
+	for( unsigned int i = 0; i < db.size(); i++ ) 
+	{
+		dLRep[i] = mOracle->GetDistance( lRep, db[i] );
 	}
 
 	root = BuildTree( lRep, db, dLRep, 0.0 );
@@ -176,21 +186,23 @@ Mdf::Tree *Mdf::BuildTree(  Point lRep,
 // Insert Incrementally
 //-------------------------------------------------------------------
 
-void Mdf::Insert( Point p) {
+void Mdf::Insert( Point p ) 
+{
+	assert( p >= 0 );
+	
+	if( root == 0 ) { // only used when inserting the first point
+		vector<Point> db;
+		vector<double> dP;
+		root = BuildTree( p, db, dP, 0.0 ); 
+		return;
+	}
 
-  if( root == 0 ) { // only used when inserting the first point
-    vector<Point> db;
-    vector<double> dP;
-    root = BuildTree( p, db, dP, 0.0 ); 
-    return;
-  }
-
-  double disToLRep = mOracle->GetDistance(root->rep, p);
+	double disToLRep = mOracle->GetDistance(root->rep, p);
   
-  Insert(p, root, disToLRep);
+	Insert(p, root, disToLRep);
   
-  // cout << "-- Printing tree --" << endl;
-  // print( root );
+	// cout << "-- Printing tree --" << endl;
+	// print( root );
 }
 
 
@@ -279,10 +291,10 @@ void Mdf::SearchNN( const Mdf::Tree  *t,
 
   // pruning what can be pruned without computing any new distance
   // if rules s, g or t are activated and right node can be pruned
-  if( sRule && disToLeftRep + nnd < t->lChild->minRadius ) {
+  if( sRule && disToLeftRep + mNNDistance < t->lChild->minRadius ) {
         
       // rule f not activated or left node cannot be pruned
-    if( !fRule || disToLeftRep - nnd < t->lChild->radius ){
+    if( !fRule || disToLeftRep - mNNDistance < t->lChild->radius ){
         // looking only on the left --> sibling node has been pruned 
         SearchNN( t->lChild, disToLeftRep);
     }
@@ -290,38 +302,38 @@ void Mdf::SearchNN( const Mdf::Tree  *t,
   }    
 
   double disToRightRep = mOracle->GetDistance( qp, t->rChild->rep);
-  if( disToRightRep < nnd ){
-    nnd = disToRightRep;
-    nnp = t->rChild->rep;
+  if( disToRightRep < mNNDistance ){
+    mNNDistance = disToRightRep;
+    mNNPoint = t->rChild->rep;
   }
   
   if( disToLeftRep < disToRightRep ) {
     // pruning and seaching if needed LEFT
-    if(    (!fRule || disToLeftRep - nnd < t->lChild->radius ) 
-        && (!sRule || disToRightRep + nnd > t->rChild->minRadius )
-        && (!uRule || disToLeftRep - nnd < disToRightRep + nnd )
+    if(    (!fRule || disToLeftRep - mNNDistance < t->lChild->radius ) 
+        && (!sRule || disToRightRep + mNNDistance > t->rChild->minRadius )
+        && (!uRule || disToLeftRep - mNNDistance < disToRightRep + mNNDistance )
       ) {
         SearchNN( t->lChild, disToLeftRep);
     }
     // pruning and seaching if needed RIGHT
-    if(    (!fRule || disToRightRep - nnd < t->rChild->radius ) 
-        && (!sRule || disToLeftRep + nnd > t->lChild->minRadius ) 
-        && (!uRule || disToLeftRep + nnd > disToRightRep - nnd )
+    if(    (!fRule || disToRightRep - mNNDistance < t->rChild->radius ) 
+        && (!sRule || disToLeftRep + mNNDistance > t->lChild->minRadius ) 
+        && (!uRule || disToLeftRep + mNNDistance > disToRightRep - mNNDistance )
       ) {
       SearchNN( t->rChild, disToRightRep );
     }
   } else {
     // pruning and seaching if needed RIGHT
-    if(    (!fRule || disToRightRep - nnd < t->rChild->radius ) 
-        && (!sRule || disToLeftRep + nnd > t->lChild->minRadius ) 
-        && (!uRule || disToLeftRep + nnd > disToRightRep - nnd )
+    if(    (!fRule || disToRightRep - mNNDistance < t->rChild->radius ) 
+        && (!sRule || disToLeftRep + mNNDistance > t->lChild->minRadius ) 
+        && (!uRule || disToLeftRep + mNNDistance > disToRightRep - mNNDistance )
       ) {
       SearchNN( t->rChild, disToRightRep );
     }
     // pruning and seaching if needed LEFT
-    if(    (!fRule || disToLeftRep - nnd < t->lChild->radius )
-        && (!sRule || disToRightRep + nnd > t->rChild->minRadius ) 
-        && (!uRule || disToLeftRep - nnd < disToRightRep + nnd )
+    if(    (!fRule || disToLeftRep - mNNDistance < t->lChild->radius )
+        && (!sRule || disToRightRep + mNNDistance > t->rChild->minRadius ) 
+        && (!uRule || disToLeftRep - mNNDistance < disToRightRep + mNNDistance )
       ) {
       SearchNN( t->lChild, disToLeftRep );
     }
@@ -329,13 +341,14 @@ void Mdf::SearchNN( const Mdf::Tree  *t,
 }
 
 //--------------------------------------
-void Mdf::SearchNN( Point _qp) 
+void Mdf::SearchNN( Point _qp ) 
 {
-  qp = _qp;
-  nnp = root->rep;
-  nnd = mOracle->GetDistance( qp, root->rep );
+	assert( _qp >= 0 );
+	qp = _qp;
+	mNNPoint = root->rep;
+	mNNDistance = mOracle->GetDistance( qp, root->rep );
 
-  return SearchNN( root, nnd );
+	return SearchNN( root, mNNDistance );
 }
 
 
@@ -344,7 +357,7 @@ void Mdf::SearchNN( Point _qp)
 //  Auxiliary
 //-------------------------------------------------------------------
 
-void Mdf::Print( Mdf::Tree *t) 
+void Mdf::Print( Mdf::Tree *t ) 
 {
   if( t != 0 ) {
     cout << "rep:" << t->rep << endl;

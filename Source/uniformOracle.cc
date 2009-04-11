@@ -6,8 +6,10 @@ CheckInOracle(
   UniformOracle, 
   "unif", 
   "Uniform distribution\n\
-  -d <int>   Set dimension"
+  -d <int>        Set dimension\n\
+######"
 )
+
 
 //------------------------------------------------------
 //
@@ -15,16 +17,15 @@ UniformOracle::UniformOracle( vector<string> data )
 {
 	mDim = -1;
 	
-	if( data.size() != 3 || data[1] != "-d" || StringToInt( data[2], mDim ) == false )
+	if( data.size() != 3 || data[1] != "-d" || 
+		!StringToInt( data[2], mDim ) || mDim <= 0 )
 	{
 		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
+		cout << "Usage: " << endl;
+		CheckInOracle::ListInfo( data[0] );
 		exit(-1);
 	}
 	
-	if( mDim < 0 ) {
-		cerr << "ERROR (" << data[0] << "): A dimension should be specified" << endl;
-		exit(-1);
-	}
 }    
 
 
@@ -47,6 +48,8 @@ Point UniformOracle::NewPoint()
 //
 void UniformOracle::PrintPoint( Point p ) 
 {
+	assert( p>=0 && (unsigned)p < mData.size() ); 
+	
 	for( int i = 0; i < mDim; i++ )
 		cout << mData[p][i] << " ";
 		
@@ -58,6 +61,9 @@ void UniformOracle::PrintPoint( Point p )
 //
 double UniformOracle::CalculateDistance( Point p1, Point p2 ) 
 {
+	assert( p1>=0 && (unsigned)p1 < mData.size() );
+	assert( p2>=0 && (unsigned)p2 < mData.size() ); 
+	
 	double res = 0.0;
 
 	for( int i = 0; i < mDim; i++ )

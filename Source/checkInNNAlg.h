@@ -15,7 +15,7 @@ using namespace std;
 
 
 template <typename T>
-NNAlg* createNNAlg( vector<string> data, Oracle *o ) 
+NNAlg* CreateNNAlg( vector<string> data, Oracle *o ) 
 {
 	return new T( data, o);
 };
@@ -33,11 +33,16 @@ class CheckInNNAlg
 			return 0;
 		}
 
-		static void ListInfo() {
-			for( map<string,string>::iterator i = tableInfo.begin();
-				i != tableInfo.end(); i++ ) 
-			{
-					cout << "* " << i->first << ": " << i->second << endl << endl;
+		static void ListInfo(string name="") 
+		{
+			if(name != "")
+				cout <<  "* " << name << ": " << tableInfo[name] << endl;
+			else {
+				for( map<string,string>::iterator i = tableInfo.begin();
+					i != tableInfo.end(); i++ ) 
+				{
+						cout << "* " << i->first << ": " << i->second << endl << endl;
+				}
 			}
 		}
 
@@ -54,7 +59,7 @@ class CheckInNNAlgDer : CheckInNNAlg
 
 		CheckInNNAlgDer( string name, string info) 
 		{
-			table[name] = createNNAlg<T>;
+			table[name] = CreateNNAlg<T>;
 			tableInfo[name] = info;
 		}
     

@@ -6,7 +6,8 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include <values.h>
+#include <assert.h>
+//#include <values.h>
 #include "nnAlg.h"
 #include "checkInNNAlg.h"
 #include "lib_string.h"

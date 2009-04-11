@@ -19,6 +19,8 @@ BruteForce::BruteForce( vector<string> data, Oracle * oracle )
 	if( data.size() != 1 )
 	{
 		cerr << "ERROR: " << data[0] << " does not need options." << endl;
+		cout << "Usage: " << endl;
+		CheckInNNAlg::ListInfo( data[0] );
 		exit(-1);
 	}
 }
@@ -28,16 +30,22 @@ BruteForce::BruteForce( vector<string> data, Oracle * oracle )
 //
 void BruteForce::Insert( Point p ) 
 {
-	db.push_back(p);
+	assert( (unsigned)p == mDb.size() );
+	
+	mDb.push_back( p );
 }
 
 
 //------------------------------------------------------
 //
-void BruteForce::InsertBulk( Point p[], int c) 
-{
-	for( int i = 0; i < c; i++ ) {
-		db.push_back(p[i]);
+void BruteForce::InsertBulk( Point p[], int size) 
+{		
+	assert( size >= 0 );
+	
+	for( int i = 0; i < size; i++ ) 
+	{
+		assert( (unsigned)p[i] == mDb.size() );
+		mDb.push_back( p[i] );
 	}
 }
 
@@ -46,16 +54,18 @@ void BruteForce::InsertBulk( Point p[], int c)
 //
 void BruteForce::SearchNN( Point p ) 
 {
-	nnp = db[0];
-	nnd = mOracle->GetDistance( p, db[0] );
+	assert( p >= 0 && (unsigned)p < mDb.size() );
+	
+	mNNPoint = mDb[0];
+	mNNDistance = mOracle->GetDistance( p, mDb[0] );
 
-	for( unsigned int i = 1; i < db.size(); i++) 
+	for( unsigned int i = 1; i < mDb.size(); i++) 
 	{
-		double dis = mOracle->GetDistance( p, db[i]);
+		double dis = mOracle->GetDistance( p, mDb[i] );
 		
-		if( dis < nnd ) {
-			nnd = dis;
-			nnp = db[i];
+		if( dis < mNNDistance ) {
+			mNNDistance = dis;
+			mNNPoint = mDb[i];
 		}
 	}
 }

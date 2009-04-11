@@ -10,16 +10,14 @@
 using namespace std;
 
 
-
 #define CheckInOracle(CLASS,NAME,INFO) \
 		static CheckInOracleDer<CLASS> a(NAME,INFO);
 
 
-
 template <typename T>
-Oracle* createOracle( vector<string> data ) 
+Oracle* CreateOracle( vector<string> data ) 
 {
-  return new T(data);
+	return new T(data);
 };
 
 
@@ -35,12 +33,16 @@ class CheckInOracle
 			return 0;
 		}
 
-		static void ListInfo() 
+		static void ListInfo(string name="") 
 		{
-			for( map<string,string>::iterator i = tableInfo.begin();
-				i != tableInfo.end(); i++ ) 
-			{			
-					cout << "* " << i->first << ": " << i->second << endl << endl;
+			if(name != "")
+				cout << "* " << name << ": " << tableInfo[name] << endl;
+			else {
+				for( map<string,string>::iterator i = tableInfo.begin();
+					i != tableInfo.end(); i++ ) 
+				{			
+						cout << "* " << i->first << ": " << i->second << endl << endl;
+				}
 			}
 		}
 
@@ -53,11 +55,11 @@ class CheckInOracle
 template< typename T>
 class CheckInOracleDer : CheckInOracle 
 {
-  public:
+	public:
 
 		CheckInOracleDer( string name, string info) 
 		{
-			table[name] = createOracle<T>;
+			table[name] = CreateOracle<T>;
 			tableInfo[name] = info;
 		}    
 };

@@ -19,18 +19,19 @@ class NNAlg
 
 		virtual void Insert( Point p ) = 0;
 
-		virtual void InsertBulk( Point p[], int c ) = 0;
+		virtual void InsertBulk( Point p[], int size ) = 0;
 
 		virtual void SearchNN( Point p ) = 0;
 
-		Point GetNNPoint() { return nnp; }
+		Point GetNNPoint() { return mNNPoint; }
 
-		double GetNNDistance() { return nnd; }	
+		double GetNNDistance() { return mNNDistance; }	
 		
 	protected:
 	
-		Point nnp;   // the Nearest Neighbour Point
-		double nnd;  // the nearest Neighbour Distance
+		Point mNNPoint;   // the Nearest Neighbour Point
+		
+		double mNNDistance;  // the Nearest Neighbour Distance
 		
 		Oracle* mOracle;
 		

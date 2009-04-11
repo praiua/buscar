@@ -1,4 +1,9 @@
-
+/*-------------------------------------------------------------------
+ * 
+ * Workbench for Nearest Neighbour algorithms.
+ * 
+ * -----------------------------------------------------------------*/
+ 
 #include <iostream>
 #include <string>
 #include <vector>
@@ -44,10 +49,9 @@ void PrintUsage(string mainFileName)
 	cout << "       -nh                No heading" << endl;
 	cout << "       -ph                Print heading" << endl;	
 	cout << "       -r <int>           Repetitions" << endl;
-	cout << "  -s <int>                Seed" << endl;
-	cout << "  -check                  Compare with the brute force" << endl;
-	cout << "  -debug                  Debug mode" << endl;
-	cout << "  -h                      Help" << endl;
+	cout << "  [-s <int>]              Seed" << endl;
+	cout << "  [-check]                Compare with the brute force" << endl;
+	cout << "  [-debug]                Debug mode" << endl;	
 	cout << "  -alg <name> \"<options>\" NN algorithm" << endl; 
 	cout << "  -ora <name> \"<options>\" Data generator" << endl;
 
@@ -223,7 +227,7 @@ void PrintOperation(bool heading, string operation, int size, int seed, float di
 					vector<string> algOpts, vector<string> oraOpts)
 {
 	if( heading ) {
-		printf("%6s %6s %4s %7s   %-15s   %-16s\n",
+		printf("%6s %6s %4s %7s   %-20s   %-20s\n",
 				"# Oper", "size", "Seed", "Dist", 
 				"NN Algorithm", "Oracle");
 	}
@@ -235,7 +239,7 @@ void PrintOperation(bool heading, string operation, int size, int seed, float di
 	else
 		printf("%7d", (int)dist);
 	
-	printf("   %-15s   %-16s\n",			
+	printf("   %-20s   %-20s\n",			
 		VectorToString( algOpts ).c_str(), VectorToString ( oraOpts ).c_str() );
 }
 
@@ -261,7 +265,7 @@ void OperationInsertingBulk(Operation operation, int seed, bool check,
 	nnAlg->InsertBulk(v, bulk);  // It can only be done once 
 	
 	dis = oracle->NumOfDistanceComputations() - dis;
-	
+			
 	accDis += dis;
 
 	if( check ) {
@@ -290,7 +294,7 @@ void OperationInsertingOneByOne(Operation operation, int seed, bool check,
 		//    cout << "--- i: " << i << endl;
 		int dis = oracle->NumOfDistanceComputations();
 		
-		nnAlg->Insert(p);
+		nnAlg->Insert( p );
 		
 		dis = oracle->NumOfDistanceComputations() - dis;
 		accDis += dis;
@@ -322,16 +326,18 @@ void OperationTesting(Operation operation, int seed, bool check,
 		Point p = oracle->NewPoint();
 		int dis = oracle->NumOfDistanceComputations();
 		
-		nnAlg->SearchNN(p);
+		nnAlg->Insert( p );
+		nnAlg->SearchNN( p );
 		
 		dis = oracle->NumOfDistanceComputations() - dis;
 		accDis += dis;
 		
 		if(check) 
 		{
-			nnAlgBF->SearchNN(p);
+			nnAlgBF->SearchNN( p );
 			
-			if( nnAlg->GetNNDistance() != nnAlgBF->GetNNDistance() ) {
+			if( nnAlg->GetNNDistance() != nnAlgBF->GetNNDistance() ) 
+			{
 				cout << "ERROR: the result does not agrees with the brute force\n";
 				cout << "  Iteration: " << i << endl;
 				cout << "  BF point: " << nnAlgBF->GetNNPoint();
@@ -362,7 +368,8 @@ int main( int argc, char* argv[] )
 	vector<string> nnAlgOpts, oracleOpts;
 	vector<Operation> operationList;
 
-
+	
+	
 	checkInputParameters( argc, argv, 
 						  seed, check, debug, 
 						  nnAlgOpts, oracleOpts,

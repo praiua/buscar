@@ -30,12 +30,12 @@ class Paesa: public NNAlg
 
 	private:
 
-		int np;              // nmero de prototipos
-		int *pivot;          // Pivotes
-		double **tdist;      // tabla de distancias
-		int num_used_pivots;
-		int gpaso_mas_cercano;
-		int gRep;
+		int mNp;              // nmero de prototipos
+		int *mPivot;          // Pivotes
+		double **mTDist;      // tabla de distancias
+		//int mNum_used_pivots;
+		//int mGpaso_mas_cercano;
+		int mGRep;
 
 };
 

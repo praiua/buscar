@@ -14,10 +14,14 @@ CheckInNNAlg(
 //
 Paesa::Paesa( vector<string> data, Oracle * oracle )
 {
-	mOracle = oracle;
-	tdist = 0;
-	np = -1;
-	gRep = 1;
+	mOracle = oracle;	
+	mNp = -1;
+	//mNum_used_pivots = 0;
+	//mGpaso_mas_cercano = 0;
+	mGRep = 1;
+	mTDist = 0;
+	mPivot = 0;
+
 
 	for(unsigned int i = 1; i < data.size(); i++ )
 	{
@@ -44,7 +48,8 @@ Paesa::Paesa( vector<string> data, Oracle * oracle )
 //
 Paesa::~Paesa() 
 {
-	
+	//int *pivot;          // Pivotes
+	//double **tdist;      // tabla de distancias
 }
 
 
@@ -70,96 +75,103 @@ void Paesa::Insert( Point p )
 void Paesa::InsertBulk( Point p[], int size )
 {
 	
-  if( tdist != 0 ) {
-    for( int i = 0; i < np; i++ )
-      delete[] tdist[i];
-    delete[] tdist;
-    delete[] pivot;
-  }
+	if( tdist != 0 ) {
+		for( int i = 0; i < np; i++ )
+			delete[] tdist[i];
+		delete[] tdist;
+		delete[] pivot;
+	}
 
 
-  np = ora->numProt();
+	np = ora->numProt();
     
-  tdist = new double*[np];
-  for( int i = 0; i < np; i++ ) {
-    tdist[i] = new double[np];
-    for( int j = 0; j < np; j++ )
-      tdist[i][j] = ora->distancia(i,j);
-  }
+	tdist = new double*[np];
+	for( int i = 0; i < np; i++ ) 
+	{
+		tdist[i] = new double[np];
+		for( int j = 0; j < np; j++ )
+			tdist[i][j] = ora->distancia(i,j);
+	}
 /*
-  pivot = new int[np];
-  bool eliminado[np];
-  double dis_pivots[np];
-  for( int i = 0; i < np; i++) {
-    eliminado[i] = false;
-    dis_pivots[i] = 0.0;
-  }
+	pivot = new int[np];
+	bool eliminado[np];
+	double dis_pivots[np];
+	for( int i = 0; i < np; i++) {
+		eliminado[i] = false;
+		dis_pivots[i] = 0.0;
+	}
   
-  int piv = 0;
+	int piv = 0;
 
-  for( int k = 0; k < np; k++ ) {
+	for( int k = 0; k < np; k++ ) {
 
-    pivot[k] = piv;
-    eliminado[k] = true;
+		pivot[k] = piv;
+		eliminado[k] = true;
 
-    for( int i = 0; i < np; i++ )  // Actualización de la separacion a los piv
-      if( !eliminado[i] )
-        dis_pivots[i] += tdist[piv][i];
+		// Actualización de la separacion a los piv
+		for( int i = 0; i < np; i++ )  
+			if( !eliminado[i] )
+				dis_pivots[i] += tdist[piv][i];
 
-    double max = 0.0;
-    for( int i = 0; i < np; i++ ) // Esoger el mejor pivot
-      if( !eliminado[i] && dis_pivots[i] > max ) {
-        max = dis_pivots[i];
-        piv = i;
-      }
+		// Esoger el mejor pivot
+		double max = 0.0;
+		for( int i = 0; i < np; i++ ) 
+			if( !eliminado[i] && dis_pivots[i] > max ) {
+				max = dis_pivots[i];
+				piv = i;
+			}
     
-  }
+	}
 */
 
-  pivot = new int[np];
-  bool eliminado[np];
-  double min_dis_pivots[np];
-  for( int i = 0; i < np; i++) {
-    eliminado[i] = false;
-    min_dis_pivots[i] = std::numeric_limits<double>::max();
-  }
+	pivot = new int[np];
+	bool eliminado[np];
+	double min_dis_pivots[np];
+	for( int i = 0; i < np; i++) 
+	{
+		eliminado[i] = false;
+		min_dis_pivots[i] = std::numeric_limits<double>::max();
+	}
 
-  int piv = 0;
+	int piv = 0;
 
-  for( int k = 0; k < np; k++ ) {
+	for( int k = 0; k < np; k++ ) 
+	{
+		pivot[k] = piv;
+		eliminado[k] = true;
 
-    pivot[k] = piv;
-    eliminado[k] = true;
+ 		// Actualización de la separacion a los piv
+		for( int i = 0; i < np; i++ )
+			if( !eliminado[i] && min_dis_pivots[i] > tdist[piv][i] )
+				min_dis_pivots[i] = tdist[piv][i];
 
-    for( int i = 0; i < np; i++ ) // Actualización de la separacion a los piv
-      if( !eliminado[i] && min_dis_pivots[i] > tdist[piv][i] )
-        min_dis_pivots[i] = tdist[piv][i];
-
-    double max = 0.0;
-    for( int i = 0; i < np; i++ ) // Esoger el mejor pivot
-      if( !eliminado[i] && min_dis_pivots[i] > max ) {
-        max = min_dis_pivots[i];
-        piv = i;
-      }
+		// Esoger el mejor pivot
+		double max = 0.0;
+		for( int i = 0; i < np; i++ ) 
+			if( !eliminado[i] && min_dis_pivots[i] > max ) {
+				max = min_dis_pivots[i];
+				piv = i;
+			}
     
-  }
+	}
 
-  for( int i = 0; i < np; i++ )
-    if( pivot[i] < 0 || pivot[i] >= np )
-      cerr << "ERROR: incorrect pivot" << endl;
+	for( int i = 0; i < np; i++ )
+		if( pivot[i] < 0 || pivot[i] >= np )
+			cerr << "ERROR: incorrect pivot" << endl;
 
-  num_used_pivots = 0;
-  gpaso_mas_cercano = 0;
+//	num_used_pivots = 0;
+//	gpaso_mas_cercano = 0;
+	
 /*
-  int* pivot2 = new int[np];
-  int j = 0;
-  for( int i = 1; i < np; i += 2 )
-    pivot2[j++] = pivot[i];
-  for( int i = 0; i < np; i += 2 )
-    pivot2[j++] = pivot[i];
+	int* pivot2 = new int[np];
+	int j = 0;
+	for( int i = 1; i < np; i += 2 )
+		pivot2[j++] = pivot[i];
+	for( int i = 0; i < np; i += 2 )
+		pivot2[j++] = pivot[i];
   
-  delete[] pivot;
-  pivot = pivot2;
+	delete[] pivot;
+	pivot = pivot2;
 */
 
 }
@@ -179,8 +191,8 @@ void Paesa::SearchNN( Point p )
 		G[i] = 0;
 	}
 
-	int paso = 0;
-	int paso_mas_cercano = 0;
+//	int paso = 0;
+//	int paso_mas_cercano = 0;
 
 	mNNPoint = -1;
 	mNNDistance = std::numeric_limits<double>::max();
@@ -192,9 +204,9 @@ void Paesa::SearchNN( Point p )
 	int cont = 0;
 	for( int j = 0; j < np; j++) 
 	{
-		paso++;
+//		paso++;
 
-		num_used_pivots++;
+//		num_used_pivots++;
 		piv = pivot[j];
 
 		double dis_piv_mues = mOracle->GetDistance(p, piv);
@@ -203,7 +215,7 @@ void Paesa::SearchNN( Point p )
 		{
 			mNNDistance = dis_piv_mues;
 			mNNPoint = piv;
-			paso_mas_cercano = paso;
+//			paso_mas_cercano = paso;
 		}
 		removed[piv] = true;
 
@@ -242,14 +254,14 @@ void Paesa::SearchNN( Point p )
 	
 	while( quedan_no_eliminados ) 
 	{
-		paso++;
+//		paso++;
 
 		double dis_piv_mues = mOracle->GetDistance(p, piv);
 		
 		if( dis_piv_mues < mNNDistance ) {
 			mNNDistance = dis_piv_mues;
 			mNNPoint = piv;
-			paso_mas_cercano = paso;
+//			paso_mas_cercano = paso;
 		}
 		removed[piv] = true;
 
@@ -285,7 +297,7 @@ void Paesa::SearchNN( Point p )
 
 	}
 	
-	gpaso_mas_cercano += paso_mas_cercano;
+//	gpaso_mas_cercano += paso_mas_cercano;
   
   
 	delete [] removed;

@@ -57,14 +57,13 @@ Laesa::Laesa( vector<string> data, Oracle * oracle )
 		exit(-1);
 	}
 
-
 	
 	mPb = new int[ mNum_pb ];
 	mDis_pb = new double*[ mNum_pb ];
-	mEs_base = 0;
+	mEs_base = NULL;
 	
 	for( int i = 0; i < mNum_pb; i++ )
-		mDis_pb[i] = 0;
+		mDis_pb[i] = NULL;
 	
 }
 
@@ -74,10 +73,13 @@ Laesa::Laesa( vector<string> data, Oracle * oracle )
 Laesa::~Laesa() 
 {
 	delete [] mPb;
-	delete [] mEs_base;
+	
+	if( mEs_base  != NULL )
+		delete [] mEs_base;
 	
 	for( int i = 0; i < mNum_pb; i++ )
 		delete [] mDis_pb[i];
+	delete [] mDis_pb;	
 }
 
 
@@ -87,9 +89,6 @@ Laesa::~Laesa()
 //
 void Laesa::Insert( Point p )
 {
-  	assert( p >= 0 && p == mNum_p );
-  	assert (mAlg_pb == "minmax" || mAlg_pb == "minsup");
-  	
 	Point aux[] = {p}; 
 
 	InsertBulk( aux, 1 );

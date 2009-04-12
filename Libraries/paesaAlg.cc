@@ -15,18 +15,18 @@ CheckInNNAlg(
 Paesa::Paesa( vector<string> data, Oracle * oracle )
 {
 	mOracle = oracle;	
-	mNp = -1;
+	mNp = 0;
 	//mNum_used_pivots = 0;
 	//mGpaso_mas_cercano = 0;
 	mGRep = 1;
-	mTDist = 0;
-	mPivot = 0;
+	mTDist = NULL;
+	mPivot = NULL;
 
 
 	for(unsigned int i = 1; i < data.size(); i++ )
 	{
     	if( data[i] == "-r" && i < data.size() - 1 &&
-			StringToInt(data[++i], gRep) && gRep < 0)
+			StringToInt(data[++i], mGRep) && mGRep < 0)
 		{
 			;
 		}
@@ -48,8 +48,13 @@ Paesa::Paesa( vector<string> data, Oracle * oracle )
 //
 Paesa::~Paesa() 
 {
-	//int *pivot;          // Pivotes
-	//double **tdist;      // tabla de distancias
+	if( mTDist != NULL ) 
+	{
+		for( int i = 0; i < mNp; i++ )
+			delete[] mTDist[i];
+		delete[] mTDist;
+		delete[] mPivot;
+	}
 }
 
 
@@ -59,12 +64,9 @@ Paesa::~Paesa()
 //
 void Paesa::Insert( Point p )
 {
-/*  	assert( p >= 0 && p == mNum_p );
-  	assert (mAlg_pb == "minmax" || mAlg_pb == "minsup");
-  	
 	Point aux[] = {p}; 
 
-	InsertBulk( aux, 1 );*/
+	InsertBulk( aux, 1 );
 }
 	
 
@@ -73,27 +75,63 @@ void Paesa::Insert( Point p )
 //-------------------------------------------------------------------
 //
 void Paesa::InsertBulk( Point p[], int size )
-{
+{	 		
+	/******************************/  	
+  	/*
+  	mNum_p += size;
+
+	// reservo espacio para la tabla de distancias
+
+  	for( int i = 0; i < mNum_pb; i++ ) 
+  	{
+    	delete [] mDis_pb[i];    		
+    	mDis_pb[i] = new double[ mNum_p ];
+  	}
+
+	delete [] mEs_base;
+	mEs_base = new bool[ mNum_p ];
 	
-	if( tdist != 0 ) {
-		for( int i = 0; i < np; i++ )
-			delete[] tdist[i];
-		delete[] tdist;
-		delete[] pivot;
+
+	if( mAlg_pb == "minmax" )
+		Min_max( );
+		
+	else if( mAlg_pb == "minsup" )
+		Min_sup( );
+		
+
+	mNum_pnb = mNum_p - mNum_pb;
+//  cout << "num_pb :" << num_pb << endl;
+//  cout << "num_pnb:" << num_pnb << endl;
+	
+	
+	*/
+	/******************************/
+		
+	assert( size >= 0 );
+	for( int i = 0; i < size; i++ )
+  		assert( p[i] == mNp + i );
+	
+	
+	if( mTDist != NULL ) {
+		for( int i = 0; i < mNp; i++ )
+			delete[] mTDist[i];
+		delete[] mTDist;
+		delete[] mPivot;
 	}
 
-
-	np = ora->numProt();
+	mNp += size;
+	//np = ora->numProt();
     
-	tdist = new double*[np];
-	for( int i = 0; i < np; i++ ) 
+	mTDist = new double*[ mNp ];
+	for( int i = 0; i < mNp; i++ ) 
 	{
-		tdist[i] = new double[np];
-		for( int j = 0; j < np; j++ )
-			tdist[i][j] = ora->distancia(i,j);
+		mTDist[i] = new double[ mNp ];
+		
+		for( int j = 0; j < mNp; j++ )
+			mTDist[i][j] = mOracle->GetDistance(i, j);
 	}
 /*
-	pivot = new int[np];
+	mPivot = new int[np];
 	bool eliminado[np];
 	double dis_pivots[np];
 	for( int i = 0; i < np; i++) {
@@ -103,9 +141,9 @@ void Paesa::InsertBulk( Point p[], int size )
   
 	int piv = 0;
 
-	for( int k = 0; k < np; k++ ) {
+	for( int k = 0; k < mNp; k++ ) {
 
-		pivot[k] = piv;
+		mPivot[k] = piv;
 		eliminado[k] = true;
 
 		// Actualización de la separacion a los piv
@@ -124,54 +162,56 @@ void Paesa::InsertBulk( Point p[], int size )
 	}
 */
 
-	pivot = new int[np];
-	bool eliminado[np];
-	double min_dis_pivots[np];
-	for( int i = 0; i < np; i++) 
+	mPivot = new int[ mNp ];
+	bool removed[ mNp ];
+	double min_dis_pivots[ mNp ];
+	
+	for( int i = 0; i < mNp; i++) 
 	{
-		eliminado[i] = false;
+		removed[i] = false;
 		min_dis_pivots[i] = std::numeric_limits<double>::max();
 	}
 
 	int piv = 0;
 
-	for( int k = 0; k < np; k++ ) 
+	for( int k = 0; k < mNp; k++ ) 
 	{
-		pivot[k] = piv;
-		eliminado[k] = true;
+		mPivot[k] = piv;
+		removed[k] = true;
 
  		// Actualización de la separacion a los piv
-		for( int i = 0; i < np; i++ )
-			if( !eliminado[i] && min_dis_pivots[i] > tdist[piv][i] )
-				min_dis_pivots[i] = tdist[piv][i];
+		for( int i = 0; i < mNp; i++ )
+			if( !removed[i] && min_dis_pivots[i] > mTDist[piv][i] )
+				min_dis_pivots[i] = mTDist[piv][i];
 
 		// Esoger el mejor pivot
 		double max = 0.0;
-		for( int i = 0; i < np; i++ ) 
-			if( !eliminado[i] && min_dis_pivots[i] > max ) {
+		for( int i = 0; i < mNp; i++ ) 
+			if( !removed[i] && min_dis_pivots[i] > max ) {
 				max = min_dis_pivots[i];
 				piv = i;
 			}
     
 	}
 
-	for( int i = 0; i < np; i++ )
-		if( pivot[i] < 0 || pivot[i] >= np )
+	for( int i = 0; i < mNp; i++ )
+		if( mPivot[i] < 0 || mPivot[i] >= mNp )
 			cerr << "ERROR: incorrect pivot" << endl;
 
 //	num_used_pivots = 0;
 //	gpaso_mas_cercano = 0;
 	
 /*
-	int* pivot2 = new int[np];
+	int* pivot2 = new int[mNp];
 	int j = 0;
-	for( int i = 1; i < np; i += 2 )
-		pivot2[j++] = pivot[i];
-	for( int i = 0; i < np; i += 2 )
+	for( int i = 1; i < mNp; i += 2 )
+		pivot2[j++] = mPivot[i];
+	for( int i = 0; i < mNp; i += 2 )
 		pivot2[j++] = pivot[i];
   
-	delete[] pivot;
-	pivot = pivot2;
+	mPivot = pivot2;
+	delete[] pivot2;
+	
 */
 
 }
@@ -184,9 +224,9 @@ void Paesa::InsertBulk( Point p[], int size )
 // double mNNDistance;	// disMin
 void Paesa::SearchNN( Point p )
 {
-	bool *removed = new bool[np];
-	double *G = new double[np];
-	for( int i = 0; i < np; i++ ) {
+	bool *removed = new bool[mNp];
+	double *G = new double[mNp];
+	for( int i = 0; i < mNp; i++ ) {
 		removed[i] = false;
 		G[i] = 0;
 	}
@@ -202,12 +242,12 @@ void Paesa::SearchNN( Point p )
 	int piv = -1;
 
 	int cont = 0;
-	for( int j = 0; j < np; j++) 
+	for( int j = 0; j < mNp; j++) 
 	{
 //		paso++;
 
 //		num_used_pivots++;
-		piv = pivot[j];
+		piv = mPivot[j];
 
 		double dis_piv_mues = mOracle->GetDistance(p, piv);
 		
@@ -219,9 +259,9 @@ void Paesa::SearchNN( Point p )
 		}
 		removed[piv] = true;
 
-		for( int i = 0; i < np; i++ ) // Actualizar cota 
+		for( int i = 0; i < mNp; i++ ) // Actualizar cota 
 		{
-			double dis_cir = fabs( tdist[piv][i] - dis_piv_mues );
+			double dis_cir = fabs( mTDist[piv][i] - dis_piv_mues );
 			
 			if( G[i] < dis_cir )
 				G[i] = dis_cir;
@@ -231,7 +271,7 @@ void Paesa::SearchNN( Point p )
 		min_G = std::numeric_limits<double>::max();
 		piv = -1;
 	
-		for( int i = 0; i < np; i++ )  // Aproximación
+		for( int i = 0; i < mNp; i++ )  // Aproximación
 		{
 			if( !removed[i] && G[i] < min_G ) {
 				min_G = G[i];
@@ -244,7 +284,7 @@ void Paesa::SearchNN( Point p )
 			cont = 0;
 		}
 
-		if( cont == gRep ) 
+		if( cont == mGRep ) 
 			break;
 			
 	}//end for
@@ -265,14 +305,14 @@ void Paesa::SearchNN( Point p )
 		}
 		removed[piv] = true;
 
-		for( int i = 0; i < np; i++ ) // Actualizar cota
+		for( int i = 0; i < mNp; i++ ) // Actualizar cota
 		{
-			double dis_cir = fabs( tdist[piv][i] - dis_piv_mues );
+			double dis_cir = fabs( mTDist[piv][i] - dis_piv_mues );
 			if( G[i] < dis_cir )
 				G[i] = dis_cir;
 		}
 
-		for( int i = 0; i < np; i++ )  // Eliminación
+		for( int i = 0; i < mNp; i++ )  // Eliminación
 		{
 			if( G[i] >= mNNDistance ) 
 				removed[i] = true;
@@ -280,9 +320,9 @@ void Paesa::SearchNN( Point p )
      
 		double min = std::numeric_limits<double>::max();
 		piv = -1;
-		for( int i = 0; i < np; i++ )  // Aproximación
+		for( int i = 0; i < mNp; i++ )  // Aproximación
 		{
-			if( !eliminado[i]) 
+			if( !removed[i]) 
 			{
 				double aux =  G[i];
 				if( aux < min ) {
@@ -300,8 +340,8 @@ void Paesa::SearchNN( Point p )
 //	gpaso_mas_cercano += paso_mas_cercano;
   
   
-	delete [] removed;
-	double [] G;
+	delete [] removed;	
+	delete [] G;
 }
 
 

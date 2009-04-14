@@ -1,0 +1,6 @@
+#    ora  nMues  nProt   sem     dist dim     alg   NodVis  prof   reg     util_t        t    t_pre
+    unif   1000   1000     0   899.33  20 fu2tlpq      957    38    ft     0.55     0.54
+    unif   1000   2000     0  1699.62  20 fu2tlpq     1870    56    ft     1.31     2.25
+    unif   1000   3000     0  2386.65  20 fu2tlpq     2697    50    ft     2.08     5.18
+    unif   1000   4000     0  3054.32  20 fu2tlpq     3516    61    ft     2.82     9.32
+    unif   1000   5000     0  3639.11  20 fu2tlpq     4272    61    ft     4.10    15.43

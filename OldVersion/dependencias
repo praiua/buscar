@@ -1,0 +1,17 @@
+buscar.o: buscar.C Include/algBus.h Include/oraculo.h Include/fuerzaBruta.h Include/algBus.h
+Obj/aesa.o: Lib/aesa.C Include/aesa.h Include/algBus.h Include/oraculo.h
+Obj/algBus.o: Lib/algBus.C Include/algBus.h Include/oraculo.h
+Obj/fu2.o: Lib/fu2.C Include/fu2.h Include/algBus.h Include/oraculo.h
+Obj/fu2tl.o: Lib/fu2tl.C Include/fu2tl.h Include/algBus.h Include/oraculo.h Include/baseTable.h Include/staticTable.h
+Obj/fu2tlpq.o: Lib/fu2tlpq.C Include/fu2tlpq.h Include/algBus.h Include/oraculo.h Include/baseTable.h Include/staticTable.h
+Obj/fuerzaBruta.o: Lib/fuerzaBruta.C Include/fuerzaBruta.h Include/algBus.h Include/oraculo.h
+Obj/fukunaga.o: Lib/fukunaga.C Include/fukunaga.h Include/algBus.h Include/oraculo.h Include/oraculo.h
+Obj/laesa.o: Lib/laesa.C Include/laesa.h Include/algBus.h Include/oraculo.h Include/oraculo.h
+Obj/oraculo.o: Lib/oraculo.C Include/oraculo.h
+Obj/oraDisEd.o: Lib/oraDisEd.C Include/oraDisEd.h Include/oraculo.h
+Obj/oraDisL.o: Lib/oraDisL.C Include/oraDisL.h Include/oraculo.h
+Obj/oraTabla1.o: Lib/oraTabla1.C Include/oraTabla1.h Include/oraculo.h
+Obj/oraUni.o: Lib/oraUni.C Include/oraUni.h Include/oraculo.h
+Obj/paesa.o: Lib/paesa.C Include/paesa.h Include/algBus.h Include/oraculo.h
+Obj/treeTab.o: Lib/treeTab.C Include/treeTab.h Include/algBus.h Include/oraculo.h
+Obj/vp.o: Lib/vp.C Include/vp.h Include/algBus.h Include/oraculo.h

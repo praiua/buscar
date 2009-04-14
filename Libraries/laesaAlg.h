@@ -18,7 +18,7 @@ class Laesa: public NNAlg
 	
 	public:
  
-		Laesa( vector<string> data, Oracle *oracle  );
+		Laesa( vector<string> data, Oracle *oracle );
 
 		~Laesa();
   

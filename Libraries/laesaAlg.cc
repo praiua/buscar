@@ -24,7 +24,7 @@ Laesa::Laesa( vector<string> data, Oracle * oracle )
 	bool error = false;
 
 
-	for(unsigned int i = 1; i < data.size(); i++ )
+	for(unsigned int i = 1; i < data.size() && !error; i++ )
 	{
     	if( data[i] == "-bpa" && i < data.size() - 1)
 		{

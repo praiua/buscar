@@ -6,7 +6,7 @@ CheckInNNAlg(
   Paesa,
   "paesa",
   "P - Approximating and Eliminating Search Algorithm\n\
-  -r <int>       gRep"
+  [-r <int>]       gRep"
 )
 
 
@@ -75,37 +75,7 @@ void Paesa::Insert( Point p )
 //-------------------------------------------------------------------
 //
 void Paesa::InsertBulk( Point p[], int size )
-{	 		
-	/******************************/  	
-  	/*
-  	mNum_p += size;
-
-	// reservo espacio para la tabla de distancias
-
-  	for( int i = 0; i < mNum_pb; i++ ) 
-  	{
-    	delete [] mDis_pb[i];    		
-    	mDis_pb[i] = new double[ mNum_p ];
-  	}
-
-	delete [] mEs_base;
-	mEs_base = new bool[ mNum_p ];
-	
-
-	if( mAlg_pb == "minmax" )
-		Min_max( );
-		
-	else if( mAlg_pb == "minsup" )
-		Min_sup( );
-		
-
-	mNum_pnb = mNum_p - mNum_pb;
-//  cout << "num_pb :" << num_pb << endl;
-//  cout << "num_pnb:" << num_pnb << endl;
-	
-	
-	*/
-	/******************************/
+{
 		
 	assert( size >= 0 );
 	for( int i = 0; i < size; i++ )

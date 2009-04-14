@@ -1,5 +1,5 @@
 
-#include "bruteForce.h"
+#include "bruteForceAlg.h"
 
 
 CheckInNNAlg(

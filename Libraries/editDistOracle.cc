@@ -26,7 +26,7 @@ EditDistOracle::EditDistOracle( vector<string> data )
 	mOracleName = data[0];
 
 
-	for(unsigned int i = 1; i < data.size(); i++ )
+	for(unsigned int i = 1; i < data.size() && !error; i++ )
 	{        	
     
     	if( data[i] == "-f" && i < data.size() - 1)

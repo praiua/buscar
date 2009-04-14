@@ -6,7 +6,6 @@
 #include <vector>
 #include <limits>
 #include <assert.h>
-//#include <values.h>
 #include "nnAlg.h"
 #include "checkInNNAlg.h"
 #include "lib_string.h"
@@ -60,7 +59,7 @@ class Vptree: public NNAlg
 
 		Tree* BuildTree( vector<int> data );
 		
-		int TreeDepth( Vptree::Tree *a );	
+		int TreeDepth( Vptree::Tree *a );
 
 		
 		

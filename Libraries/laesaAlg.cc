@@ -296,7 +296,7 @@ struct Elem {
   int    ind;
 };
 
-int Comp( const void* elem1, const void* elem2 ) 
+static int CompLaesa( const void* elem1, const void* elem2 ) 
 {
 	if( ((Elem*)elem1)->g < ((Elem*)elem2)->g )
 		return -1;
@@ -363,7 +363,7 @@ void Laesa::SearchNN( Point p )
 	}
     
 
-	qsort( elem, mNum_pnb, sizeof(Elem), Comp );
+	qsort( elem, mNum_pnb, sizeof(Elem), CompLaesa );
 
 	for( int i = 0; i < mNum_pnb; i++ ) 
 	{    

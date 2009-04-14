@@ -7,7 +7,6 @@
 #include <vector>
 #include <string>
 #include <assert.h>
-//#include <values.h>
 #include "nnAlg.h"
 #include "checkInNNAlg.h"
 #include "lib_string.h"

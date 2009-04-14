@@ -6,7 +6,6 @@
 #include <math.h>
 #include <limits>
 #include <assert.h>
-//#include <values.h>
 #include <math.h>
 #include "nnAlg.h"
 #include "checkInNNAlg.h"

@@ -1,13 +1,12 @@
 #ifndef laesa_h 
 #define laesa_h
 
-//#include <stdio.h>
+
 #include <stdlib.h>
 #include <iostream>
 #include <math.h>
 #include <limits>
 #include <assert.h>
-//#include <values.h>
 #include "nnAlg.h"
 #include "checkInNNAlg.h"
 #include "lib_string.h"
@@ -26,7 +25,7 @@ class Laesa: public NNAlg
 	
 		void InsertBulk( Point p[], int size );
 	
-		void SearchNN( Point p );		
+		void SearchNN( Point p );
 
   
 	private:

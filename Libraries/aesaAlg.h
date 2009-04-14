@@ -10,6 +10,7 @@
 #include <assert.h>
 #include "nnAlg.h"
 #include "checkInNNAlg.h"
+#include "lib_string.h"
 
 
 class Aesa: public NNAlg 

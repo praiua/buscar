@@ -266,7 +266,7 @@ struct sdis {
 	double dis;
 };
 
-static int Comp( const void *p1, const void *p2 ) 
+static int CompVptree( const void *p1, const void *p2 ) 
 {
 	sdis *e1 = (sdis*) p1;
 	sdis *e2 = (sdis*) p2;
@@ -334,7 +334,7 @@ Vptree::Tree* Vptree::BuildTree( vector<int> data )
 	// disten menos que el radio del representante
 
   
-	qsort( dist, num_dis, sizeof(sdis), Comp );
+	qsort( dist, num_dis, sizeof(sdis), CompVptree );
 	
 	vector<int> p_bloque;
 	int total = 0;

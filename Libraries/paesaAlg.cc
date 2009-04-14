@@ -5,7 +5,7 @@
 CheckInNNAlg(
   Paesa,
   "paesa",
-  "P - Approximating and Eliminating Search Algorithm\n\
+  "P-Approximating and Eliminating Search Algorithm\n\
   [-r <int>]       gRep"
 )
 

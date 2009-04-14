@@ -19,7 +19,10 @@ Aesa::Aesa( vector<string> data, Oracle * oracle )
 		
 	if( data.size() != 1 )
 	{
-		cerr << "ERROR: " << data[0] << " does not need options." << endl;
+		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
+		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
+		cout << "Usage: " << endl;
+		CheckInNNAlg::ListInfo( data[0] );	
 		exit(-1);
 	}
 }

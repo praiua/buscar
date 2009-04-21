@@ -14,7 +14,7 @@ using namespace std;
 
 
 template <typename T>
-Oracle* CreateOracle( vector<string> data ) 
+Oracle* CreateOracle( string data) 
 {
 	return new T(data);
 };
@@ -25,7 +25,7 @@ class CheckInOracle
 {
 	public:
 
-		typedef map< string, Oracle* (*)( vector<string> ) > table_t;
+		typedef map< string, Oracle* (*)( string ) > table_t;
 		typedef map< string, string > tableInfo_t;
 
 //
@@ -41,14 +41,14 @@ class CheckInOracle
                         static tableInfo_t *a = new tableInfo_t;
                         return *a;
                 }
-		static Oracle* Object( vector<string> data )
+		static Oracle* Object( string className, const string data )
 		{
-			if( table().count( data[0] ) == 1 )
-				return table()[ data[0] ]( data );
+			if( table().count( className ) )
+				return table()[ className ]( data );
 			return 0;
 		}
 
-		static void ListInfo(string name="") 
+		static void ListInfo(string name = "") 
 		{
 			if(name != "")
 				cout << "* " << name << ": " << tableInfo()[name] << endl;

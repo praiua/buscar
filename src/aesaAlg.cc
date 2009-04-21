@@ -13,16 +13,14 @@ CheckInNNAlg(
 
 //-------------------------------------------------------------------
 //
-Aesa::Aesa( vector<string> data, Oracle * oracle )
+Aesa::Aesa( string data, Oracle * oracle )
 {
 	mOracle = oracle;
 		
-	if( data.size() != 1 )
+	if( ! data.empty() )
 	{
-		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-		cout << "Usage: " << endl;
-		CheckInNNAlg::ListInfo( data[0] );	
+		cerr << "ERROR in Aesa: Wrong input parameters" << endl;
+		cerr << "  Unknown '" <<  data  << "' options" << endl;
 		exit(-1);
 	}
 }

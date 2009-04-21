@@ -13,7 +13,7 @@ using namespace std;
         static CheckInNNAlgDer<CLASS> a(NAME,INFO);
 
 template <typename T>
-NNAlg* CreateNNAlg( vector<string> data, Oracle *o ) 
+NNAlg* CreateNNAlg( string data, Oracle *o ) 
 {
 	return new T( data, o);
 };
@@ -23,7 +23,7 @@ NNAlg* CreateNNAlg( vector<string> data, Oracle *o )
 class CheckInNNAlg 
 {
 	public:
-		typedef map< string, NNAlg* (*)( vector<string>, Oracle* ) > table_t;
+		typedef map< string, NNAlg* (*)( string, Oracle* ) > table_t;
 		typedef map< string, string > tableInfo_t;
 //
 // 	This is done in this ugly way to avoid the "static initialization order fiasco"
@@ -38,14 +38,14 @@ class CheckInNNAlg
 			return *a;
 		}
 
-		static NNAlg* Object( vector<string> data, Oracle* o )
+		static NNAlg* Object( string algName, string data, Oracle* o )
 		{
-			if( table().count( data[0] ) == 1 )
-				return table()[ data[0] ]( data, o );
+			if( table().count( algName ) == 1 )
+				return table()[ algName ]( data, o );
 			return 0;
 		}
 
-		static void ListInfo(string name="") 
+		static void ListInfo(string name = "") 
 		{
 			if(name != "")
 				cout <<  "* " << name << ": " << tableInfo()[name] << endl;

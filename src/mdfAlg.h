@@ -17,7 +17,7 @@ class Mdf: public NNAlg
 {
   public:
 
-	Mdf( vector<string> data, Oracle *_o );
+	Mdf( string data, Oracle *_o );
 
 	~Mdf();
 	

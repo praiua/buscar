@@ -14,49 +14,53 @@ CheckInNNAlg(
 
 //-------------------------------------------------------------------
 //
-Laesa::Laesa( vector<string> data, Oracle * oracle ) 
+Laesa::Laesa( string data, Oracle * oracle ) 
 {
 	mOracle = oracle;
 	mNum_p = 0;
 	mNum_pnb = 0;
 	mNum_pb = 2;
 	mAlg_pb = "minmax";
-	bool error = false;
 
-
-	for(unsigned int i = 1; i < data.size() && !error; i++ )
+        string token;
+        istringstream ss(data);
+        while( ss >> token ) 
 	{
-    	if( data[i] == "-bpa" && i < data.size() - 1)
+    		if( token == "-bpa" )
 		{
-			mAlg_pb = data[++i];
+                       if( !(ss >> mAlg_pb) )
+                        {
+                                cerr << "ERROR in Laesa: no file name" << endl;
+                                exit(-1);
+                        }
 		}
-		else if( data[i] == "-bp" && i < data.size() - 1 &&
-			StringToInt(data[++i], mNum_pb) )
+		else if( token == "-bp" )
 		{
-			;
+                        if( !(ss >> mNum_pb) )
+                        {
+                                cerr << "ERROR in Laesa: no base prototypes given" << endl;
+                                exit(-1);
+                        }
 		}
-    	else 
-    	{
-    		error = true;			
-		}
+                else
+                {
+                        cerr << "ERROR in EditDistOracle: unrecognized option '" << token << "'" << endl;
+                        exit(-1);
+                }
 	}
 
-	if( (mAlg_pb != "minmax" && mAlg_pb != "minsup") || 
-		mNum_pb < 0)
+	if( mAlg_pb != "minmax" && mAlg_pb != "minsup") 
 	{
-		error = true;
+		cerr << "ERROR in Laesa: wrong algorithm '" << mAlg_pb << "'" << endl;
+                exit(-1);
+ 	} 
+
+	if( mNum_pb < 0 )
+	{
+		cerr << "ERROR in Laesa: wrong number of bp (" << mNum_pb << ")" << endl;
+                exit(-1);
 	}
 	
-	
-	if( error )
-	{
-		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-		cout << "Usage: " << endl;
-		CheckInNNAlg::ListInfo( data[0] );
-		exit(-1);
-	}
-
 	
 	mPb = new int[ mNum_pb ];
 	mDis_pb = new double*[ mNum_pb ];
@@ -81,9 +85,6 @@ Laesa::~Laesa()
 		delete [] mDis_pb[i];
 	delete [] mDis_pb;	
 }
-
-
-
 
 //-------------------------------------------------------------------
 //

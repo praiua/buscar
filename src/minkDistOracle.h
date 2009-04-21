@@ -20,7 +20,7 @@ class MinkDistOracle : public Oracle
 {
 	public:
 
-		MinkDistOracle( vector<string> data );
+		MinkDistOracle( string data );
 		
 		~MinkDistOracle();
 

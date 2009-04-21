@@ -17,7 +17,7 @@ class Aesa: public NNAlg
 {
 	public: 
 
-		Aesa( vector<string> data, Oracle *oracle );
+		Aesa( string data, Oracle *oracle );
 	  
 		void Insert( Point p );
 	

@@ -16,53 +16,56 @@ CheckInOracle(
 
 //---------------------------------------------------------------------
 //
-MinkDistOracle::MinkDistOracle( vector<string> data ) 
+MinkDistOracle::MinkDistOracle( string data ) 
 {
 	mDegree = 2.0;
 	mDim = -1;
-	bool error = false;
-	mOracleName = data[0];
 	
+	string token;
+	istringstream ss(data);
 
-	for(unsigned int i = 1; i < data.size() && !error; i++ )
+	while( ss >> token ) 
 	{
-    	if( data[i] == "-f" && i < data.size() - 1)
+                if( token == "-f" )
+                {
+                        if( !(ss >> mFileProt) )
+                        {
+                                cerr << "ERROR in MinkDistOracle: no file name" << endl;
+                                exit(-1);
+                        }
+                }
+		else if( token == "-d" ) 
 		{
-			mFileProt = data[++i];
+                       if( !(ss >> mDim) )
+                        {
+                                cerr << "ERROR in MinkDistOracle: no dimension" << endl;
+                                exit(-1);
+                        }
+		}	
+		else if( token == "-n" ) {
+                       if( !(ss >> mDegree ) )
+                        {
+                                cerr << "ERROR in MinkDistOracle: no degree" << endl;
+                                exit(-1);
+                        }
 		}
-		else if( data[i] == "-d" && i < data.size() - 1 &&
-			StringToInt(data[++i], mDim) )
-		{
-			;
-		}
-		else if( data[i] == "-n" && i < data.size() - 1 &&
-			StringToFloat(data[++i], mDegree) )
-		{
-			;
-		}
-    	else 
-    	{
-    		error = true;			
-		}
+               else
+                {
+                        cerr << "ERROR in MinkDistOracle: unrecognized option '" << token << "'" << endl;
+                        exit(-1);
+                }
 	}
-
-	if( mFileProt.empty() || mDim <= 0)
-	{
-		error = true;
-	}
+	if( mFileProt.empty())
+        {
+                cerr << "ERROR in MinkDistOracle: no file name given" << endl;
+                exit(-1);
+        }
+	if( mDim <= 0)
+        {
+                cerr << "ERROR in MinkDistOracle: no dimension given" << endl;
+                exit(-1);
+        }
 	
-	
-	if( error )
-	{
-		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-		cout << "Usage: " << endl;
-		CheckInOracle::ListInfo( data[0] );
-		exit(-1);
-	}
-  
-
-  	
 	ReadPrototypes( mFileProt );
 
 }

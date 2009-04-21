@@ -16,7 +16,7 @@ class Vptree: public NNAlg
 	
 	public:
 
-		Vptree( vector<string> data, Oracle *oracle );
+		Vptree( string data, Oracle *oracle );
 		
 		~Vptree();
 		

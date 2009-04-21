@@ -13,20 +13,17 @@ CheckInNNAlg(
 
 //-------------------------------------------------------------------
 //
-TreeTab::TreeTab( vector<string> data, Oracle * oracle ) 
+TreeTab::TreeTab( string data, Oracle * oracle ) 
 {
 	mOracle = oracle;
 	mRoot = 0;
 	mTabDis = 0;
 	mTabProt = 0;
 	
-	if( data.size() != 1 )
+	if( !data.empty() )
 	{
-    	cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-		cout << "Usage: " << endl;
-		CheckInNNAlg::ListInfo( data[0] );
-		exit(-1);
+                cerr << "ERROR in TreeTab: no options expected (" << data << ")" << endl;
+                exit(-1);
 	}	
 }
 

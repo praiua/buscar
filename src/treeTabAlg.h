@@ -15,7 +15,7 @@ class TreeTab: public NNAlg
 {
 	public:
 
- 		TreeTab( vector<string> data, Oracle * oracle );
+ 		TreeTab( string data, Oracle * oracle );
 
 		~TreeTab();
 		

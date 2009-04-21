@@ -16,7 +16,7 @@ class Paesa: public NNAlg
 {	
 	public:
 
-		Paesa( vector<string> data, Oracle * oracle );
+		Paesa( string data, Oracle * oracle );
 		
 		~Paesa();
 

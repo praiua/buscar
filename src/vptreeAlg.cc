@@ -23,7 +23,6 @@ Vptree::Vptree( string data, Oracle *oracle )
 	mExtrem = false;
 	mNumChild = 2;
 	mRaiz = 0;	 
-	bool error = false;
 
         string token;
         istringstream ss(data);
@@ -47,7 +46,7 @@ Vptree::Vptree( string data, Oracle *oracle )
                                 cerr << "ERROR in VpTree: I cant read the rules" << endl;
                                 exit(-1);
                         }
-                        for( int i = 0; i < token.length(); i++ )
+                        for( unsigned i = 0; i < token.length(); i++ )
                         {
                                 if( token[i] == '1' )
                                 {

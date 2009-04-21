@@ -54,7 +54,6 @@ void BruteForce::InsertBulk( Point p[], int size)
 void BruteForce::SearchNN( Point p ) 
 {
 	assert( p >= 0);
-	assert( (unsigned)p < mDb.size() );
 	
 	mNNPoint = mDb[0];
 	mNNDistance = mOracle->GetDistance( p, mDb[0] );

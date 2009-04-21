@@ -261,11 +261,13 @@ void OperationInsertingBulk(Operation operation, int seed, bool check,
 		v[i] = o->NewPoint();
 	}
 	
+	cout << "Bulk: " << bulk << endl;
 	int dis = o->NumOfDistanceComputations();
 	
 	a->InsertBulk(v, bulk);  // It can only be done once 
 	
 	dis = o->NumOfDistanceComputations() - dis;
+	cout << "dis: " << dis << endl;
 			
 	accDis += dis;
 
@@ -328,7 +330,7 @@ void OperationTesting(Operation operation, int seed, bool check,
 		Point p = o->NewPoint();
 		int dis = o->NumOfDistanceComputations();
 		
-		a->Insert( p );
+//		a->Insert( p );
 		a->SearchNN( p );
 		
 		dis = o->NumOfDistanceComputations() - dis;

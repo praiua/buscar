@@ -21,7 +21,6 @@ Mdf::Mdf( string data, Oracle *oracle )
 	fRule = false;
 	sRule = false;
 	uRule = false;
-	bool error = false;
 
         string token;
         istringstream ss(data);
@@ -33,7 +32,7 @@ Mdf::Mdf( string data, Oracle *oracle )
 				cerr << "ERROR in Mdf: I cant read the rules" << endl;
 				exit(-1);
 			}
-			for( int i = 0; i < token.length(); i++ )
+			for( unsigned i = 0; i < token.length(); i++ )
 			{
 				if( token[i] == 'f' )
 				{

@@ -313,7 +313,7 @@ static int CompLaesa( const void* elem1, const void* elem2 )
 //
 void Laesa::SearchNN( Point p ) 
 {
-	assert( p >= 0 && p < mNum_p );
+	assert( p >= 0 );
 	
 	mNNDistance = std::numeric_limits<double>::max();
 	mNNPoint = -1;

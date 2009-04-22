@@ -330,7 +330,6 @@ void OperationTesting(Operation operation, int seed, bool check,
 		Point p = o->NewPoint();
 		int dis = o->NumOfDistanceComputations();
 		
-//		a->Insert( p );
 		a->SearchNN( p );
 		
 		dis = o->NumOfDistanceComputations() - dis;

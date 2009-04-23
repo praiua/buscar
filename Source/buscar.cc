@@ -326,7 +326,7 @@ void OperationTesting(Operation operation, int seed, bool check,
 		Point p = oracle->NewPoint();
 		int dis = oracle->NumOfDistanceComputations();
 		
-		nnAlg->Insert( p );
+		//nnAlg->Insert( p );
 		nnAlg->SearchNN( p );
 		
 		dis = oracle->NumOfDistanceComputations() - dis;

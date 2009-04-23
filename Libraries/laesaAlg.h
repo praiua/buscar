@@ -30,17 +30,18 @@ class Laesa: public NNAlg
   
 	private:
 	
-		void Min_sup();
+//		void Min_sup();
 		void Min_max();
 				
 		
 		string mAlg_pb;
-		int mNum_pb;
-		int mNum_p;		
-		int *mPb;
-		int mNum_pnb;
-		bool *mEs_base;
-		double **mDis_pb;
+		int mNum_pb;       // number of pb
+		int mNum_p;	   // number of prototypes	
+		int *mPb;          // pb
+		int mNum_pnb;      // number of non-base
+		bool *mEs_base;    // if is base
+		//double **mDis_pb;  // table of distances
+		vector< vector<double> > mDis_pb;  // table of distances
 		
 };
 

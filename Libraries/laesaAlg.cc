@@ -20,7 +20,7 @@ Laesa::Laesa( vector<string> data, Oracle * oracle )
 	mNum_p = 0;
 	mNum_pnb = 0;
 	mNum_pb = 2;
-	mAlg_pb = "minmax";
+	mAlg_pb = "minmax";   
 	bool error = false;
 
 
@@ -59,12 +59,16 @@ Laesa::Laesa( vector<string> data, Oracle * oracle )
 
 	
 	mPb = new int[ mNum_pb ];
-	mDis_pb = new double*[ mNum_pb ];
 	mEs_base = NULL;
 	
-	for( int i = 0; i < mNum_pb; i++ )
-		mDis_pb[i] = NULL;
+	//mDis_pb = new double*[ mNum_pb ];
+	//for( int i = 0; i < mNum_pb; i++ )
+	//	mDis_pb[i] = NULL;
 	
+	for( int i = 0; i < mNum_pb; i++ ){
+                vector<double> v;
+		mDis_pb.push_back( v );
+        }
 }
 
 
@@ -77,9 +81,9 @@ Laesa::~Laesa()
 	if( mEs_base  != NULL )
 		delete [] mEs_base;
 	
-	for( int i = 0; i < mNum_pb; i++ )
-		delete [] mDis_pb[i];
-	delete [] mDis_pb;	
+	//for( int i = 0; i < mNum_pb; i++ )
+	//	delete [] mDis_pb[i];
+	//delete [] mDis_pb;	
 }
 
 
@@ -87,18 +91,112 @@ Laesa::~Laesa()
 
 //-------------------------------------------------------------------
 //
+/*
 void Laesa::Insert( Point p )
 {
 	Point aux[] = {p}; 
-
 	InsertBulk( aux, 1 );
 }
+*/	
+
+void Laesa::Insert( Point p )
+{
+        int new_bp;  // indice a partir del cual cambiaremos el pb
+
+  	mNum_p ++;    //new size of the database
+
+        for ( int j = 0; j < mNum_pb; j++ ){  // for every bp
+            double ndist = mOracle->GetDistance( p, mPb[j] );
+            mDis_pb[j].push_back( ndist ); //añado en ultima columna
+        }
+
+        int min_prev, min_new;
+        for ( int j = 1; j < mNum_pb; j++ ){  // for every bp
+          min_prev = std::numeric_limits<double>::max(); 
+          min_new = std::numeric_limits<double>::max();
+          for ( int k = 1; k <= j; k++ ){
+            if ( mDis_pb[j][mPb[k-1]] < min_prev )
+              min_prev = mDis_pb[j][mPb[k-1]];
+            
+            double ndist = mOracle->GetDistance( p, mPb[k-1] );
+            if ( mDis_pb[k-1][mNum_p-1] < min_new )
+              min_new = ndist;
+          }
+          if (min_new > min_prev){ // substitution of bp
+            new_bp = j;
+            break; // salimos del for cuando lo hayamos encontrado
+          }
+        }
+
+        if ( new_bp == mNum_pb ) { cout << "no actualizamos nada" << endl; }
+        else {  // new Min Max a partir de j
+	  // inicio el vector de distancias minimas
+	  double *d_min = new double[ mNum_p ];	
 	
+	  for( int i = 0; i < mNum_p; i++ ) {
+		d_min[i] = std::numeric_limits<double>::max();
+	  }
 
+	  for( int k = new_bp; k < mNum_pb; k++ ) 
+                mEs_base[mPb[k]] = false;  // deja de ser base
 
+	  mPb[new_bp] = p;  // el j-esimo pb será p	
+	  mEs_base[p] = true;
+
+          // actualizo solo d_min para los que no se tocan
+	  for( int k = 0; k < new_bp; k++ ) 
+		for( int j = 0; j < mNum_p; j++ ) 
+		{
+			if( mDis_pb[k][j] < d_min[j] )
+				d_min[j] = mDis_pb[k][j];
+		}
+          // a partir del indice new_bp hasta mNum_bp igual que Min_Max()
+
+          int i = new_bp;
+	  while( true ) 
+	  {  
+		// relleno la tabla de distancias a partir de j y actualizo 
+		// el vector de distancias minimas
+
+		for( int j = 0; j < mNum_p; j++ ) 
+		{
+			mDis_pb[i][j] = mOracle->GetDistance( mPb[i], j );
+
+			if( mDis_pb[i][j] < d_min[j] )
+				d_min[j] = mDis_pb[i][j];
+		}
+	
+		i++;
+		if( i == mNum_pb )
+			break;
+
+		// busco el siguiente prototipo base
+		double max = -1.0;
+		for( int j = 0; j < mNum_p; j++ ) 
+		{
+			if( !mEs_base[j] && d_min[j] > max ) 
+			{
+				max = d_min[j];
+				mPb[i] = j;
+			}
+		}
+
+		if( mNum_p > 1 && max == -1.0 ) {
+			cerr << "ERROR (Laesa)::Min_max() function: Not enough prototypes." << endl;
+			exit(-1);
+		}
+
+		mEs_base[ mPb[i] ] = true;
+	  }
+	
+	  delete d_min;
+          
+        }
+
+}
 
 //-------------------------------------------------------------------
-//
+//OJO, QUE SI SE LLAMA DOS VECES CASCA, Y LOS INDICES NO CONSECUTIVOS!!
 void Laesa::InsertBulk( Point p[], int size )
 {
 	assert( size >= 0 );
@@ -110,21 +208,25 @@ void Laesa::InsertBulk( Point p[], int size )
 
 	// reservo espacio para la tabla de distancias
 
+    	mDis_pb.clear();
   	for( int i = 0; i < mNum_pb; i++ ) 
   	{
-    	delete [] mDis_pb[i];    		
-    	mDis_pb[i] = new double[ mNum_p ];
+    	//delete [] mDis_pb[i];   		
+    	// mDis_pb[i] = new double[mNum_p];
+        vector<double> v(mNum_p);
+        mDis_pb.push_back( v );
+        
   	}
 
 	delete [] mEs_base;
 	mEs_base = new bool[ mNum_p ];
 	
 
-	if( mAlg_pb == "minmax" )
+	//if( mAlg_pb == "minmax" )
 		Min_max( );
 		
-	else if( mAlg_pb == "minsup" )
-		Min_sup( );
+	//else if( mAlg_pb == "minsup" )
+	//	Min_sup( );
 		
 
 	mNum_pnb = mNum_p - mNum_pb;
@@ -137,6 +239,7 @@ void Laesa::InsertBulk( Point p[], int size )
 
 //-------------------------------------------------------------------
 //
+/*    YA LO MIRARE 
 void Laesa::Min_sup() 
 {
 	double dis[mNum_p][mNum_p];
@@ -229,7 +332,7 @@ void Laesa::Min_sup()
 		mEs_base[ mPb[i] ] = true;
   	}
 }
-
+*/
 
 //-------------------------------------------------------------------
 //

@@ -14,37 +14,52 @@ CheckInNNAlg(
 //    Options set up
 //-------------------------------------------------------------------
 
-Mdf::Mdf( vector<string> data, Oracle *oracle ) 
+Mdf::Mdf( string data, Oracle *oracle ) 
 {
 	mOracle = oracle;
 	root = 0;
 	fRule = false;
 	sRule = false;
 	uRule = false;
-	bool error = false;
 
-	if( data.size() != 3 || data[1] != "-r" )
-	{
-		error = true;
-	}
-	else if( data[2] == "f" )
-		fRule = true;
-	else if(  data[2] == "s" )
-		sRule = true;
-	else if(  data[2] == "u" )
-		uRule = true;
-	else {
-		error = true;
-	}
-	
-	if( error )
-	{
-		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-		cout << "Usage: " << endl;
-		CheckInNNAlg::ListInfo( data[0] );
-		exit(-1);
-	}
+        string token;
+        istringstream ss(data);
+        while( ss >> token ) {
+		if( token == "-r" ) 
+		{
+			if( !( ss >> token ) ) 
+			{
+				cerr << "ERROR in Mdf: I cant read the rules" << endl;
+				exit(-1);
+			}
+			for( unsigned i = 0; i < token.length(); i++ )
+			{
+				if( token[i] == 'f' )
+				{
+					fRule = true;
+				}
+				else if( token[i] == 's' )
+				{
+					sRule = true;
+				}
+				else if( token[i] == 'u' )
+				{
+					uRule = true;
+				}
+				else {
+	                                cerr << "ERROR in Mdf: unknown rule (" << token[i] <<")" << endl;
+	                                exit(-1);
+	                        }
+			}
+		} 
+		else 
+		{
+			cerr << "ERROR in Mdf: unknown option (" << token <<")" << endl;
+ 			exit(-1);
+		}
+ 	
+ 	} 
+
 }
 
 

@@ -17,48 +17,52 @@ CheckInOracle(
 
 //---------------------------------------------------------------------
 //
-EditDistOracle::EditDistOracle( vector<string> data ) 
+EditDistOracle::EditDistOracle( string data ) 
 {
 	mWi = 1.0;
 	mWd = 1.0;
 	mWs = 2.0;
-	bool error = false;
-	mOracleName = data[0];
 
-
-	for(unsigned int i = 1; i < data.size() && !error; i++ )
-	{        	
-    
-    	if( data[i] == "-f" && i < data.size() - 1)
+        string token;
+        istringstream ss(data);
+        while( ss >> token ) {
+ 
+    		if( token == "-f" )
 		{
-			mFileProt = data[++i];
+			if( !(ss >> mFileProt) ) 
+			{
+				cerr << "ERROR in EditDistOracle: no file name" << endl;
+				exit(-1);
+			}
 		}
-		else if( data[i] == "-w" && i < data.size() - 3 &&
-			StringToFloat(data[++i], mWi) &&
-			StringToFloat(data[++i], mWd) &&
-			StringToFloat(data[++i], mWs))
-		{
-			;
+		else if( token == "-w" ) {
+			if( !(ss >> mWi) ) 
+			{
+				cerr << "ERROR in EditDistOracle: no insertion weight" << endl;
+				exit(-1);
+			}
+			if( !(ss >> mWd) ) 
+			{
+				cerr << "ERROR in EditDistOracle: no deletion weight" << endl;
+				exit(-1);
+			}
+			if( !(ss >> mWs) ) 
+			{
+				cerr << "ERROR in EditDistOracle: no substitution weight" << endl;
+				exit(-1);
+			}
 		}
-    	else 
-    	{
-    		error = true;			
+    		else 
+    		{
+			cerr << "ERROR in EditDistOracle: unrecognized option '" << token << "'" << endl;
+			exit(-1);
 		}
 	}
 	
 	
 	if( mFileProt.empty() )
 	{
-		error = true;
-	}
-	
-	
-	if( error )
-	{
-		cerr << "ERROR (" << mOracleName << "): Wrong input parameters" << endl;
-		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-		cout << "Usage: " << endl;
-		CheckInOracle::ListInfo( mOracleName );
+		cerr << "ERROR in EditDistOracle: no file name" << endl;
 		exit(-1);
 	}
 
@@ -85,7 +89,7 @@ void EditDistOracle::ReadPrototypes( string file )
 	
 	ifstream fProt( file.c_str() );
 	if( !fProt ) {
-		cerr << "ERROR (" << mOracleName << "): The file '" << file << "' can not be opened." << endl;
+		cerr << "ERROR ( EditDistOracle ): The file '" << file << "' can not be opened." << endl;
 		exit(-1);
 	}
 	
@@ -95,7 +99,7 @@ void EditDistOracle::ReadPrototypes( string file )
 	fProt.close();
 	
 	if( mTable.size() == 0 ) {
-    	cerr << "ERROR (" << mOracleName << "): The file '" << file << "' is empty." << endl;
+    	cerr << "ERROR ( EditDistOracle ): The file '" << file << "' is empty." << endl;
     	exit(-1);
   	}	
 	
@@ -111,7 +115,7 @@ Point EditDistOracle::NewPoint()
 {
 	if( mTable.size() == mPrototypes.size() ) 
 	{   
-		cerr << "ERROR (" << mOracleName << "): Not enough prototypes in the file '" << mFileProt << "'" << endl;
+		cerr << "ERROR ( EditDistOracle ): Not enough prototypes in the file '" << mFileProt << "'" << endl;
 	    exit(-1);
 	}
   	

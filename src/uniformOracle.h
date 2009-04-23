@@ -15,7 +15,7 @@ class UniformOracle : public Oracle
 {
 	public:
 
-		UniformOracle( vector<string> data );
+		UniformOracle( string data );
 
 		Point NewPoint();
 		

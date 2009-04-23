@@ -15,7 +15,7 @@ CheckInNNAlg(
 
 //-------------------------------------------------------------------
 //
-Vptree::Vptree( vector<string> data, Oracle *oracle ) 
+Vptree::Vptree( string data, Oracle *oracle ) 
 {
 	mOracle = oracle;
 	mRule1 = false;
@@ -23,48 +23,53 @@ Vptree::Vptree( vector<string> data, Oracle *oracle )
 	mExtrem = false;
 	mNumChild = 2;
 	mRaiz = 0;	 
-	bool error = false;
 
-	for(unsigned int i = 1; i < data.size() && !error; i++ )
-	{
-    	if( data[i] == "-ext" ) 
-    	{
-    		mExtrem = true;
-    	}
-    	else if( data[i] == "-nc" && i < data.size() - 1 &&
-			StringToInt(data[++i], mNumChild) && mNumChild > 0)
-		{
-			;
-		}
-    	else if( data[i] == "-r" && i < data.size() - 1)
-		{
-			i++;
-			for( unsigned int j = 0; j < data[i].length(); j++ ) 
-			{
-		        if( data[i][j] == '1' )
-					mRule1 = true;
-				else if( data[i][j] == '2' ) 
-					mRule2 = true;
-				else {
-					error = true;
-				}
+        string token;
+        istringstream ss(data);
+        while( ss >> token ) {
+                if( token == "-ext" )
+    		{
+    			mExtrem = true;
+    		}
+                else if( token == "-nc" )
+    		{
+			if( !( ss >> mNumChild )) {
+                                cerr << "ERROR in VpTree: I can't read the number of children" << endl;
+                                exit(-1);
 			}
-		}		
-    	else 
-    	{
-    		error = true;			
-		}
-	}	
-	
-	if( error )
-	{
-		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-		cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-		cout << "Usage: " << endl;
-		CheckInNNAlg::ListInfo( data[0] );
-		exit(-1);
-	} 
+				
+    		}
+                if( token == "-r" )
+                {
+                        if( !( ss >> token ) )
+                        {
+                                cerr << "ERROR in VpTree: I cant read the rules" << endl;
+                                exit(-1);
+                        }
+                        for( unsigned i = 0; i < token.length(); i++ )
+                        {
+                                if( token[i] == '1' )
+                                {
+					mRule1 = true;
+                                }
+                                else if( token[i] == '2' )
+                                {
+					mRule1 = true;
+                                }
+                                else {
+                                        cerr << "ERROR in VpTree: unknown rule (" << token[i] <<")" << endl;
+                                        exit(-1);
+                                }
+                        }
+                }
+                else
+                {
+                        cerr << "ERROR in VpTree: unknown option (" << token <<")" << endl;
+                        exit(-1);
+                }
 
+        }
+  
 }
 
 

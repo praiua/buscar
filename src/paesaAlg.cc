@@ -12,7 +12,7 @@ CheckInNNAlg(
 
 //-------------------------------------------------------------------
 //
-Paesa::Paesa( vector<string> data, Oracle * oracle )
+Paesa::Paesa( string data, Oracle * oracle )
 {
 	mOracle = oracle;	
 	mNp = 0;
@@ -22,22 +22,21 @@ Paesa::Paesa( vector<string> data, Oracle * oracle )
 	mTDist = NULL;
 	mPivot = NULL;
 
-
-	for(unsigned int i = 1; i < data.size(); i++ )
-	{
-    	if( data[i] == "-r" && i < data.size() - 1 &&
-			StringToInt(data[++i], mGRep) && mGRep < 0)
-		{
-			;
+        string token;
+        istringstream ss(data);
+        while( ss >> token ) {
+		if( token == "-r" ) {
+			if( !(ss >> mGRep) )
+                        {
+                                cerr << "ERROR in EditDistOracle: no insertion weight" << endl;
+                                exit(-1);
+                        }
 		}
-    	else 
-    	{
-    		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-			cerr << "  Unknown '" << VectorToString( data ) << "' options" << endl;
-			cout << "Usage: " << endl;
-			CheckInNNAlg::ListInfo( data[0] );
-			exit(-1);
-		}
+		else
+               {
+                        cerr << "ERROR in Paesa: unrecognized option '" << token << "'" << endl;
+                        exit(-1);
+                }
 	}
 	
 }

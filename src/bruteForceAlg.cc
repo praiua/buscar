@@ -12,15 +12,14 @@ CheckInNNAlg(
 
 //------------------------------------------------------
 //
-BruteForce::BruteForce( vector<string> data, Oracle * oracle )
+BruteForce::BruteForce( string data, Oracle * oracle )
 {
 	mOracle = oracle;
 	
-	if( data.size() != 1 )
+	if( !data.empty() )
 	{
-		cerr << "ERROR: " << data[0] << " does not need options." << endl;
+		cerr << "ERROR in BruteForce:  does not need options." << endl;
 		cout << "Usage: " << endl;
-		CheckInNNAlg::ListInfo( data[0] );
 		exit(-1);
 	}
 }
@@ -54,7 +53,7 @@ void BruteForce::InsertBulk( Point p[], int size)
 //
 void BruteForce::SearchNN( Point p ) 
 {
-	assert( p >= 0 && (unsigned)p < mDb.size() );
+	assert( p >= 0);
 	
 	mNNPoint = mDb[0];
 	mNNDistance = mOracle->GetDistance( p, mDb[0] );

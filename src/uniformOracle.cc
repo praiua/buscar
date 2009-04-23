@@ -13,16 +13,30 @@ CheckInOracle(
 
 //------------------------------------------------------
 //
-UniformOracle::UniformOracle( vector<string> data )
+UniformOracle::UniformOracle( string data )
 {
 	mDim = -1;
-	
-	if( data.size() != 3 || data[1] != "-d" || 
-		!StringToInt( data[2], mDim ) || mDim <= 0 )
+
+        string token;
+        istringstream ss(data);
+        while( ss >> token ) {
+                if( token == "-d" ) 
+		{
+                        if( !(ss >> mDim) )
+                        {
+                                cerr << "ERROR in UniformOracle: no dimension" << endl;
+                                exit(-1);
+                        }
+		} 
+		else
+                {
+                        cerr << "ERROR in UniformOracle: unrecognized option '" << token << "'" << endl;
+                        exit(-1);
+                }
+ 	}
+	if( mDim <= 0 )
 	{
-		cerr << "ERROR (" << data[0] << "): Wrong input parameters" << endl;
-		cout << "Usage: " << endl;
-		CheckInOracle::ListInfo( data[0] );
+		cerr << "ERROR in UniformOracle: no dimension given" << endl;
 		exit(-1);
 	}
 	

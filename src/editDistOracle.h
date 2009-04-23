@@ -18,7 +18,7 @@ class EditDistOracle : public Oracle
 {
 	public:
 		
-		EditDistOracle( vector<string> data );
+		EditDistOracle( string data );
 		
 		~EditDistOracle();
 		
@@ -36,7 +36,6 @@ class EditDistOracle : public Oracle
 
 
 		string mFileProt;
-		string mOracleName;
 
 		vector<string> mTable;		// File content
 		vector<int> mPrototypes;  	// Prototype vector

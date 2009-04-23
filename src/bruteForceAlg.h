@@ -14,7 +14,7 @@ class BruteForce: public NNAlg
 {
 	public:
 
-		BruteForce( vector<string> data, Oracle * oracle );
+		BruteForce( string data, Oracle * oracle );
 
 		void Insert( Point);
 

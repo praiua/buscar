@@ -1,0 +1,20 @@
+aesaAlg.o: aesaAlg.cc aesaAlg.h nnAlg.h oracle.h checkInNNAlg.h \
+  lib_string.h
+bruteForceAlg.o: bruteForceAlg.cc bruteForceAlg.h nnAlg.h oracle.h \
+  checkInNNAlg.h
+editDistOracle.o: editDistOracle.cc editDistOracle.h oracle.h \
+  checkInOracle.h lib_string.h
+laesaAlg.o: laesaAlg.cc laesaAlg.h nnAlg.h oracle.h checkInNNAlg.h \
+  lib_string.h
+lib_string.o: lib_string.cc lib_string.h
+mdfAlg.o: mdfAlg.cc mdfAlg.h nnAlg.h oracle.h checkInNNAlg.h lib_string.h
+minkDistOracle.o: minkDistOracle.cc minkDistOracle.h oracle.h \
+  checkInOracle.h lib_string.h
+paesaAlg.o: paesaAlg.cc paesaAlg.h nnAlg.h oracle.h checkInNNAlg.h \
+  lib_string.h
+treeTabAlg.o: treeTabAlg.cc treeTabAlg.h nnAlg.h oracle.h checkInNNAlg.h \
+  lib_string.h
+uniformOracle.o: uniformOracle.cc uniformOracle.h oracle.h \
+  checkInOracle.h lib_string.h
+vptreeAlg.o: vptreeAlg.cc vptreeAlg.h nnAlg.h oracle.h checkInNNAlg.h \
+  lib_string.h

@@ -330,12 +330,7 @@ void OperationTesting(Operation operation, int seed, bool check,
 		Point p = o->NewPoint();
 		int dis = o->NumOfDistanceComputations();
 		
-<<<<<<< HEAD:Source/buscar.cc
-		//nnAlg->Insert( p );
-		nnAlg->SearchNN( p );
-=======
 		a->SearchNN( p );
->>>>>>> 94ffcbc149323281256cf920657468d9c00e0704:buscar/buscar.cc
 		
 		dis = o->NumOfDistanceComputations() - dis;
 		accDis += dis;

@@ -20,12 +20,7 @@ Laesa::Laesa( string data, Oracle * oracle )
 	mNum_p = 0;
 	mNum_pnb = 0;
 	mNum_pb = 2;
-<<<<<<< HEAD:Libraries/laesaAlg.cc
-	mAlg_pb = "minmax";   
-	bool error = false;
-=======
 	mAlg_pb = "minmax";
->>>>>>> 94ffcbc149323281256cf920657468d9c00e0704:src/laesaAlg.cc
 
         string token;
         istringstream ss(data);
@@ -107,7 +102,7 @@ void Laesa::Insert( Point p )
 
 void Laesa::Insert( Point p )
 {
-        int new_bp;  // indice a partir del cual cambiaremos el pb
+        int new_bp = -1;  // indice a partir del cual cambiaremos el pb
 
   	mNum_p ++;    //new size of the database
 
@@ -133,7 +128,10 @@ void Laesa::Insert( Point p )
             break; // salimos del for cuando lo hayamos encontrado
           }
         }
-
+        if (new_bp == -1) {
+            cerr << "Error in LAESA: esto no deberia pasar en Insert " << endl;
+            exit( -1 );
+        }
         if ( new_bp == mNum_pb ) { cout << "no actualizamos nada" << endl; }
         else {  // new Min Max a partir de j
 	  // inicio el vector de distancias minimas

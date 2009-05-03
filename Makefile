@@ -1,8 +1,23 @@
-all:
-	make -C src
-	make -C buscar
 
+LIB = Libraries/
+DIR = Source/
+CPP = g++
+OPTS = -Wall -g -I$(DIR) -I$(LIB)
+NAME = buscar
+
+FONTS = $(wildcard $(LIB)*.cc) $(wildcard $(DIR)*.cc)
+
+OBJ=$(patsubst %.cc,%.o,$(FONTS))
+
+
+all: $(NAME)
+
+$(NAME): $(OBJ)
+	${CPP} ${OPTS} $(OBJ) -o $(NAME)
+
+%.o: %.cc %.h
+	${CPP} -shared ${OPTS} $< -c -o $@
+	
 clean:
-	make -C src clean
-	make -C buscar clean
+	rm -f *~ ${LIB}*.o ${LIB}*~ ${DIR}*.o ${DIR}*~ $(NAME)
 

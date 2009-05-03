@@ -1,5 +1,6 @@
 CPP = g++
 OPTS = -Wall -O3
+# OPTS = -Wall -g
 INCLUDE = -I ../src
 
 buscar: buscar.cc ../src/fnns.so

@@ -33,15 +33,17 @@ class Laesa: public NNAlg
 //		void Min_sup();
 		void Min_max();
 				
-		
-		string mAlg_pb;
-		int mNum_pb;       // number of pb
-		int mNum_p;	   // number of prototypes	
-		int *mPb;          // pb
-		int mNum_pnb;      // number of non-base
-		bool *mEs_base;    // if is base
-		//double **mDis_pb;  // table of distances
-		vector< vector<double> > mDis_pb;  // table of distances
+		vector<int> mP;    // the prototypes
+		string mAlgBp;    // Algorithm to choose the base prototypes
+		int mMaxBp;       // maximum number of base prototypes
+		int mNumBp;	   // current number of base prototypes	
+		vector<int> mBp;   // the index of the base prototypes
+//		int mNum_pnb;      // number of non-base
+                vector<bool> mIsBase; // register of base prototypes
+		// table of distances:
+		// - first index: index of the prototype
+		// - second index: index of the base prototype
+		vector< vector<double> > mBpDis; 
 		
 };
 

@@ -1,7 +1,7 @@
 CPP = g++
 # OPTS = -Wall -g 
 # OPTS = -Wall -O3 -std=c++0x
-OPTS = -Wall -O3 
+OPTS = -Wall -O3
 
 FONTS = $(wildcard *.cc)
 

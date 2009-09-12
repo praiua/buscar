@@ -19,6 +19,7 @@ class Oracle
 		Oracle(): numDistances(0) {};
 
 		//virtual		~Oracle() = 0;
+		virtual ~Oracle() {};
 
 		virtual	Point 	NewPoint() = 0;
 

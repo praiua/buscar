@@ -153,7 +153,7 @@ void Paesa::InsertBulk( Point p[], int size )
 			if( !removed[i] && min_dis_pivots[i] > mTDist[piv][i] )
 				min_dis_pivots[i] = mTDist[piv][i];
 
-		// Esoger el mejor pivot
+		// Escoger el mejor pivot
 		double max = 0.0;
 		for( int i = 0; i < mNp; i++ ) 
 			if( !removed[i] && min_dis_pivots[i] > max ) {

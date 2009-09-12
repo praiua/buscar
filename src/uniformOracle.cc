@@ -42,7 +42,6 @@ UniformOracle::UniformOracle( string data )
 	
 }    
 
-
 //------------------------------------------------------
 //
 Point UniformOracle::NewPoint() 

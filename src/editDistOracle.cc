@@ -8,8 +8,10 @@ CheckInOracle(
   "Edit distance\n\
   -f <file>         File with prototypes\n\
   [-w <i> <d> <s>]  Weights of insertion, deletion and substitution\n\
-  Note: The file of prototypes is composed of series of strings\n\
-  separated by white spaces, tabs, newlines, etc."
+  Notes:\n\
+  o The file of prototypes is composed of series of strings\n\
+    separated by white spaces, tabs, newlines, etc.\n\
+  o The poins are extracted randomly from the file."
 )
 
 
